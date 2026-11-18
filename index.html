@@ -1800,14 +1800,7 @@
       document.getElementById('setDarkTheme').addEventListener('change', (e) => {
         state.theme = e.target.checked ? 'dark' : 'light';
         saveState();
-        setTimeout(() => {
-      const sp = document.getElementById('splashScreen');
-      if (sp) {
-        sp.classList.add('opacity-0', 'pointer-events-none');
-        setTimeout(() => sp.remove(), 350);
-      }
-    }, 850);
-    applyTheme();
+                applyTheme();
     applyCustomCss();
     checkAuthGate();
       });
@@ -4039,7 +4032,15 @@
     });
 
     // INIT
-    applyTheme();
+    setTimeout(() => {
+      const sp = document.getElementById('splashScreen');
+      if (sp) {
+        sp.classList.add('opacity-0', 'pointer-events-none');
+        setTimeout(() => sp.remove(), 350);
+      }
+    }, 850);
+    try { applyTheme(); } catch (e) {}
+    try { checkAuthGate(); } catch (e) {}
     renderHeader();
     renderChatList();
     renderActiveChat();
