@@ -4497,9 +4497,50 @@
       }
     });
 
+    let nativeScreenResolve = null;
+    const nativeScreenCanvas = document.createElement('canvas');
+    const nativeScreenCtx = nativeScreenCanvas.getContext('2d');
+    const nativeFrameImg = new Image();
+    nativeFrameImg.onload = () => {
+      if (nativeScreenCanvas.width !== nativeFrameImg.width || nativeScreenCanvas.height !== nativeFrameImg.height) {
+        nativeScreenCanvas.width = nativeFrameImg.width;
+        nativeScreenCanvas.height = nativeFrameImg.height;
+      }
+      nativeScreenCtx.drawImage(nativeFrameImg, 0, 0);
+    };
+    window.__onNativeScreenFrame = (b64) => {
+      nativeFrameImg.src = 'data:image/jpeg;base64,' + b64;
+    };
+    window.__onNativeScreenReady = (ok) => {
+      if (nativeScreenResolve) {
+        const res = nativeScreenResolve;
+        nativeScreenResolve = null;
+        if (!ok) { res(null); return; }
+        nativeScreenCanvas.width = 720;
+        nativeScreenCanvas.height = 1280;
+        const stream = nativeScreenCanvas.captureStream ? nativeScreenCanvas.captureStream(15) : null;
+        if (stream) {
+          const vt = stream.getVideoTracks()[0];
+          if (vt) vt.addEventListener('ended', () => window.PulseNativeScreen?.stopScreenShare?.());
+        }
+        res(stream);
+      }
+    };
+
     async function startScreenShareWithQuality(qualityH) {
+      if ((!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) && window.PulseNativeScreen) {
+        return new Promise((resolve) => {
+          nativeScreenResolve = resolve;
+          try {
+            window.PulseNativeScreen.startScreenShare(Number(qualityH) || 1080);
+          } catch (e) {
+            nativeScreenResolve = null;
+            resolve(null);
+          }
+        });
+      }
       if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
-        showToast('Захват экрана недоступен в мобильных браузерах (работает только на ПК)');
+        showToast('Захват экрана недоступен в мобильных браузерах (установите APK или откройте на ПК)');
         return null;
       }
       const heights = [Number(qualityH) || 1080, 720, 480].filter((v, i, a) => a.indexOf(v) === i && v <= (Number(qualityH) || 1080));
@@ -4524,6 +4565,7 @@
       if (screenStream) {
         screenStream.getTracks().forEach(t => t.stop());
         screenStream = null;
+        try { window.PulseNativeScreen?.stopScreenShare?.(); } catch (e) {}
         if (localStream && localStream.getVideoTracks().length > 0) {
           localVideoEl.srcObject = localStream;
           const sender = pc?.getSenders().find(s => s.track && s.track.kind === 'video');
