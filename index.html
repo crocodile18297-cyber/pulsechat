@@ -189,6 +189,13 @@
       100% { width: 100%; }
     }
     .splash-bar-anim { animation: splashBar 0.85s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+    :root { --pc-accent: #4f46e5; --pc-accent-hover: #4338ca; }
+    .accent-emerald { --pc-accent: #059669; --pc-accent-hover: #047857; }
+    .accent-cyan { --pc-accent: #0891b2; --pc-accent-hover: #0e7490; }
+    .accent-rose { --pc-accent: #e11d48; --pc-accent-hover: #be123c; }
+    .accent-amber { --pc-accent: #d97706; --pc-accent-hover: #b45309; }
+    .pc-accent-bg { background-color: var(--pc-accent) !important; }
+    .pc-accent-bg:hover { background-color: var(--pc-accent-hover) !important; }
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
     }
@@ -225,7 +232,7 @@
             <svg id="themeIconSun" class="w-5 h-5 hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
             <svg id="themeIconMoon" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
           </button>
-          <button id="newChatMenuBtn" type="button" class="w-9 h-9 flex items-center justify-center rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 transition shadow-sm" title="Новый чат или группа">
+          <button id="newChatMenuBtn" type="button" class="w-9 h-9 flex items-center justify-center rounded-xl pc-accent-bg text-white transition shadow-sm" title="Новый чат или группа">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
           </button>
         </div>
@@ -233,9 +240,12 @@
 
       <!-- Search & Filter Tabs -->
       <div class="px-3 pt-2.5 pb-2 space-y-2 border-b border-slate-100 dark:border-slate-800/80">
-        <div class="relative">
-          <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-          <input id="chatSearchInput" type="search" placeholder="Поиск чатов и друзей..." class="w-full pl-9 pr-3 py-2 text-sm rounded-xl bg-slate-100 dark:bg-slate-800 border border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-none transition" />
+        <div class="flex items-center gap-1.5">
+          <div class="relative flex-1">
+            <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <input id="chatSearchInput" type="search" placeholder="Поиск чатов и друзей..." class="w-full pl-9 pr-3 py-2 text-sm rounded-xl bg-slate-100 dark:bg-slate-800 border border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-none transition" />
+          </div>
+          <button id="markAllReadBtn" type="button" class="px-2.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-slate-700 transition shrink-0" title="Отметить все чаты прочитанными">✓✓</button>
         </div>
         <div class="grid grid-cols-4 gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl text-xs font-medium">
           <button type="button" data-filter="all" class="filter-tab flex-1 py-1.5 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm transition">Все</button>
@@ -293,6 +303,10 @@
             </button>
           </div>
           <div class="flex items-center gap-1 shrink-0">
+            <button id="voiceRoomBtn" type="button" class="hidden px-2 py-1.5 rounded-xl text-xs font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 hover:bg-emerald-200 dark:hover:bg-emerald-900/60 transition flex items-center gap-1" title="Аудио-комната группы">
+              <span>🎧</span>
+              <span id="voiceRoomCount" class="text-[11px]">0</span>
+            </button>
             <button id="inChatSearchBtn" type="button" class="p-1.5 sm:p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="Поиск по переписке">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
             </button>
@@ -311,6 +325,32 @@
             </button>
           </div>
         </header>
+
+        <!-- Group Voice Room Bar (Discord-style) -->
+        <div id="voiceRoomBar" class="hidden slide-down-anim px-3.5 py-2.5 bg-emerald-50/95 dark:bg-emerald-950/60 border-b border-emerald-200/80 dark:border-emerald-900/60 flex items-center justify-between gap-2">
+          <div class="min-w-0 flex-1">
+            <p class="text-[11px] font-bold text-emerald-700 dark:text-emerald-300 flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span>Аудио-комната группы</span>
+            </p>
+            <p id="voiceRoomMembersText" class="text-xs text-emerald-900/80 dark:text-emerald-100/80 truncate">Пока никого нет</p>
+          </div>
+          <div class="flex items-center gap-1.5 shrink-0">
+            <button id="voiceRoomMuteBtn" type="button" class="hidden px-2.5 py-1.5 rounded-xl bg-white dark:bg-slate-800 text-xs font-semibold shadow-sm">🎙️</button>
+            <button id="voiceRoomScreenBtn" type="button" class="hidden px-2.5 py-1.5 rounded-xl bg-white dark:bg-slate-800 text-xs font-semibold shadow-sm" title="Трансляция экрана">🖥</button>
+            <div id="voiceRoomAudioContainer" class="hidden"></div>
+            <button id="voiceRoomJoinBtn" type="button" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-sm transition">Войти</button>
+          </div>
+        </div>
+
+        <!-- Watch Together Video Bar (YouTube / TikTok / Vimeo / Rutube / MP4) -->
+        <div id="watchTogetherBar" class="hidden slide-down-anim bg-slate-950 text-white border-b border-slate-800 p-2.5 space-y-2">
+          <div class="flex items-center justify-between gap-2 text-xs">
+            <span class="font-semibold flex items-center gap-1.5"><span>📺</span><span id="watchTogetherTitle">Совместный просмотр</span></span>
+            <button id="closeWatchTogetherBtn" type="button" class="px-2 py-0.5 rounded-lg bg-white/10 hover:bg-white/20 text-[11px]">Закрыть ✕</button>
+          </div>
+          <div id="watchTogetherFrameWrap" class="w-full aspect-video max-h-56 rounded-xl overflow-hidden bg-black flex items-center justify-center"></div>
+        </div>
 
         <!-- In-Chat Search Bar -->
         <div id="inChatSearchBar" class="hidden slide-down-anim px-3 py-2 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center gap-1.5 panel-reveal">
@@ -414,11 +454,12 @@
           <button id="emojiToggleBtn" type="button" class="p-2.5 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition shrink-0" title="Эмодзи">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
           </button>
+          <button id="fixTextGeminiBtn" type="button" class="hidden p-2 rounded-xl text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-950/50 text-xs font-bold transition shrink-0" title="Исправить текст и пунктуацию (Gemini)">✦</button>
           <textarea id="messageInput" rows="1" placeholder="Сообщение..." class="flex-1 resize-none max-h-28 py-2.5 px-3.5 text-sm rounded-2xl bg-slate-100 dark:bg-slate-800 border border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-950 focus:outline-none transition"></textarea>
           <button id="voiceRecordBtn" type="button" class="p-2.5 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition shrink-0" title="Голосовое сообщение">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
           </button>
-          <button id="sendMessageBtn" type="submit" class="p-2.5 rounded-2xl bg-indigo-600 text-white hover:bg-indigo-700 active:scale-95 transition shadow-sm shrink-0" title="Отправить">
+          <button id="sendMessageBtn" type="submit" class="p-2.5 rounded-2xl pc-accent-bg text-white active:scale-95 transition shadow-sm shrink-0" title="Отправить">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
           </button>
         </form>
@@ -522,32 +563,60 @@
     </div>
   </div>
 
-  <!-- ACTIVE CALL OVERLAY -->
-  <div id="callOverlay" class="hidden call-anim fixed inset-0 z-50 bg-slate-950/95 text-white flex flex-col items-center justify-between p-6">
-    <div class="text-center mt-4 space-y-1">
-      <p id="callPeerName" class="text-xl font-bold">Звонок</p>
-      <p id="callStatusText" class="text-sm text-indigo-300">Соединение...</p>
-    </div>
+  <!-- MINIMIZED CALL BAR -->
+  <div id="minimizedCallBar" class="hidden slide-down-anim fixed top-3 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-md bg-emerald-600 text-white rounded-2xl px-3.5 py-2 shadow-2xl flex items-center justify-between gap-2">
+    <button id="restoreCallBtn" type="button" class="flex-1 flex items-center gap-2 text-left min-w-0">
+      <span class="w-2.5 h-2.5 rounded-full bg-white animate-ping shrink-0"></span>
+      <span id="minCallName" class="text-xs font-bold truncate">Звонок</span>
+      <span id="minCallTimer" class="text-xs font-mono opacity-90 shrink-0">00:00</span>
+    </button>
+    <button id="minEndCallBtn" type="button" class="px-2.5 py-1 rounded-xl bg-rose-600 hover:bg-rose-700 text-xs font-semibold shrink-0">Завершить</button>
+  </div>
 
-    <div class="relative w-full max-w-md flex-1 my-4 flex items-center justify-center rounded-3xl overflow-hidden bg-slate-900 border border-slate-800">
-      <video id="remoteVideo" autoplay playsinline class="hidden w-full h-full object-cover"></video>
-      <div id="callAvatarFallback" class="flex flex-col items-center gap-3">
-        <div id="callAvatarCircle" class="w-24 h-24 rounded-full bg-indigo-600 flex items-center justify-center text-3xl font-bold shadow-lg animate-pulse"></div>
-        <span class="text-xs text-slate-400">Защищено WebRTC</span>
+  <!-- ACTIVE CALL OVERLAY (Smoothly Resizable / Draggable so you can chat below!) -->
+  <div id="callOverlay" style="height: 100vh;" class="hidden call-anim fixed top-0 left-0 right-0 z-50 bg-slate-950/95 backdrop-blur-md text-white flex flex-col items-center justify-between p-4 sm:p-5 shadow-2xl border-b border-slate-800 transition-[height] duration-150">
+    <div class="w-full max-w-2xl flex items-center justify-between gap-2">
+      <div class="flex items-center gap-2 min-w-0">
+        <p id="callPeerName" class="text-sm sm:text-base font-bold truncate">Звонок</p>
+        <span id="callStatusText" class="text-xs text-indigo-300 font-mono shrink-0">Соединение...</span>
       </div>
-      <video id="localVideo" autoplay muted playsinline class="hidden absolute bottom-3 right-3 w-28 h-36 object-cover rounded-2xl border-2 border-white/30 shadow-lg"></video>
+      <div class="flex items-center gap-1.5 shrink-0">
+        <select id="screenQualitySelect" class="px-2 py-1 rounded-lg bg-slate-800 text-[11px] font-semibold border border-slate-700 focus:outline-none" title="Качество трансляции экрана">
+          <option value="1080">1080p</option>
+          <option value="720">720p</option>
+          <option value="480">480p</option>
+        </select>
+        <button id="minimizeCallBtn" type="button" class="px-2.5 py-1 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-semibold">🗗 Свернуть</button>
+      </div>
     </div>
 
-    <div class="flex items-center gap-4 mb-4">
-      <button id="toggleMicBtn" type="button" class="p-4 rounded-full bg-slate-800 hover:bg-slate-700 transition" title="Микрофон">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
+    <div class="relative w-full max-w-2xl flex-1 my-2.5 flex items-center justify-center rounded-2xl overflow-hidden bg-slate-900 border border-slate-800 min-h-[90px]">
+      <video id="remoteVideo" autoplay playsinline class="hidden w-full h-full object-contain"></video>
+      <div id="callAvatarFallback" class="flex flex-col items-center gap-2">
+        <div id="callAvatarCircle" class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-indigo-600 flex items-center justify-center text-2xl font-bold shadow-lg animate-pulse"></div>
+        <span class="text-[11px] text-slate-400">Защищено WebRTC · Тяните ползунок снизу, чтобы писать в чат</span>
+      </div>
+      <video id="localVideo" autoplay muted playsinline class="hidden absolute bottom-2 right-2 w-24 h-32 object-cover rounded-xl border-2 border-white/30 shadow-lg"></video>
+    </div>
+
+    <div class="flex items-center gap-3 mb-1">
+      <button id="toggleMicBtn" type="button" class="p-3 rounded-full bg-slate-800 hover:bg-slate-700 transition" title="Микрофон">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
       </button>
-      <button id="toggleCamBtn" type="button" class="p-4 rounded-full bg-slate-800 hover:bg-slate-700 transition" title="Камера">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+      <button id="toggleCamBtn" type="button" class="p-3 rounded-full bg-slate-800 hover:bg-slate-700 transition" title="Камера">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
       </button>
-      <button id="endCallBtn" type="button" class="p-4 rounded-full bg-rose-600 hover:bg-rose-700 transition shadow-lg" title="Завершить звонок">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M10.68 13.31a16 16 0 0 0 3.41 2.6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91"/><line x1="23" y1="1" x2="1" y2="23"/></svg>
+      <button id="shareScreenCallBtn" type="button" class="p-3 rounded-full bg-slate-800 hover:bg-indigo-600 transition" title="Трансляция экрана">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
       </button>
+      <button id="endCallBtn" type="button" class="p-3 rounded-full bg-rose-600 hover:bg-rose-700 transition shadow-lg" title="Завершить звонок">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M10.68 13.31a16 16 0 0 0 3.41 2.6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91"/><line x1="23" y1="1" x2="1" y2="23"/></svg>
+      </button>
+    </div>
+
+    <!-- Drag Handle to freely resize call window height -->
+    <div id="callResizeHandle" class="w-full py-1.5 flex items-center justify-center cursor-ns-resize touch-none select-none" title="Потяните вверх или вниз">
+      <div class="w-12 h-1.5 rounded-full bg-white/35 hover:bg-white/60 transition"></div>
     </div>
   </div>
 
@@ -595,6 +664,7 @@
       mutedChats: [],
       pinnedChats: ['chat_saved'],
       drafts: {},
+      contactAliases: {},
       favoriteStickers: [],
       blockedUsers: [],
       settings: {
@@ -605,7 +675,9 @@
         wallpaper: 'wp-default',
         bubbleColor: 'bg-indigo-600',
         bubbleStyle: 'classic',
-        browserNotifications: false
+        browserNotifications: false,
+        lowDataMode: false,
+        accentTheme: 'accent-indigo'
       },
       mode: 'firebase', // 'demo' | 'firebase'
       firebaseConfig: {
@@ -762,6 +834,12 @@
       showToast._t = setTimeout(() => toastEl.classList.add('hidden'), 2800);
     }
 
+    function applyAccentTheme() {
+      const cls = ['accent-indigo', 'accent-emerald', 'accent-cyan', 'accent-rose', 'accent-amber'];
+      document.documentElement.classList.remove(...cls);
+      document.documentElement.classList.add(state.settings?.accentTheme || 'accent-indigo');
+    }
+
     function applyCustomCss() {
       const el = document.getElementById('customLiveCss');
       if (el) el.textContent = state.customCss || '';
@@ -791,6 +869,13 @@
       return clean ? 'u_' + clean : 'user_' + Math.random().toString(36).slice(2, 8);
     }
 
+    function getDisplayName(userId, fallbackName) {
+      if (userId && state.contactAliases && state.contactAliases[userId]) {
+        return state.contactAliases[userId];
+      }
+      return fallbackName || 'Пользователь';
+    }
+
     function getInitials(name) {
       const parts = String(name || '?').trim().split(/\s+/);
       if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
@@ -805,6 +890,27 @@
         el.innerHTML = `<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`;
       } else {
         el.textContent = getInitials(name);
+      }
+    }
+
+    function triggerKeywordEffect(text) {
+      if (!text) return;
+      const low = String(text).toLowerCase();
+      let emojis = null;
+      if (/ура|праздник|поздравляю|с дн[её]м рождения|салют/.test(low)) emojis = ['🎉', '✨', '🎊', '🥳'];
+      else if (/огонь|топ|класс|супер|красава/.test(low)) emojis = ['🔥', '⚡', '✨'];
+      else if (/люблю|сердеч|обожаю/.test(low)) emojis = ['❤️', '💖', '✨'];
+      if (!emojis) return;
+      for (let i = 0; i < 14; i++) {
+        const el = document.createElement('span');
+        el.textContent = emojis[i % emojis.length];
+        el.style.cssText = `position:fixed;bottom:70px;left:${10 + Math.random()*80}vw;font-size:${18 + Math.random()*12}px;z-index:9999;pointer-events:none;transition:transform ${1.1 + Math.random()*0.7}s cubic-bezier(.2,.8,.3,1), opacity 1.4s ease-out;`;
+        document.body.appendChild(el);
+        requestAnimationFrame(() => {
+          el.style.transform = `translateY(-${45 + Math.random()*35}vh) rotate(${(Math.random()-0.5)*160}deg) scale(${0.8 + Math.random()*0.5})`;
+          el.style.opacity = '0';
+        });
+        setTimeout(() => el.remove(), 1900);
       }
     }
 
@@ -855,6 +961,19 @@
         osc.start();
         osc.stop(ctx.currentTime + 0.13);
       } catch (e) {}
+    }
+
+    function formatLastSeen(user) {
+      if (!user) return 'личный чат';
+      const ts = user.lastSeen || user.updatedAt || 0;
+      const diff = Date.now() - ts;
+      if (user.online && diff < 90000) return 'в сети';
+      if (!ts) return user.handle || 'не в сети';
+      if (diff < 60000) return 'был(а) только что';
+      if (diff < 3600000) return 'был(а) ' + Math.floor(diff / 60000) + ' мин. назад';
+      const d = new Date(ts);
+      if (diff < 86400000) return 'был(а) в ' + d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+      return 'был(а) ' + d.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' });
     }
 
     function formatDateLabel(ts) {
@@ -979,7 +1098,7 @@
               <div class="flex items-center justify-between gap-2 mb-0.5">
                 <span class="font-semibold text-sm truncate flex items-center gap-1.5">
                   ${chat.type === 'group' ? '<span class="text-[10px] px-1.5 py-0.2 rounded bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300">Группа</span>' : ''}
-                  <span class="truncate">${escapeHtml(chat.title)}</span>${(state.pinnedChats || []).includes(chat.id) ? '<span class="text-[11px] opacity-80" title="Закреплён">📌</span>' : ''}${(state.mutedChats || []).includes(chat.id) ? '<span class="text-[11px] opacity-70" title="Без звука">🔕</span>' : ''}
+                  <span class="truncate">${escapeHtml(chat.type === 'direct' ? getDisplayName(chat.peerId, chat.title) : chat.title)}</span>${(state.pinnedChats || []).includes(chat.id) ? '<span class="text-[11px] opacity-80" title="Закреплён">📌</span>' : ''}${(state.mutedChats || []).includes(chat.id) ? '<span class="text-[11px] opacity-70" title="Без звука">🔕</span>' : ''}
                 </span>
                 <span class="text-[11px] text-slate-400 shrink-0">${escapeHtml(time)}</span>
               </div>
@@ -1011,7 +1130,7 @@
         avatarImage: chat.avatarImage,
         isGroup: chat.type === 'group'
       });
-      document.getElementById('activeChatTitle').textContent = chat.title;
+      document.getElementById('activeChatTitle').textContent = chat.type === 'direct' ? getDisplayName(chat.peerId, chat.title) : chat.title;
 
       // Apply wallpaper
       messagesContainer.className = 'flex-1 overflow-y-auto scrollbar-thin chat-bg-pattern px-3 sm:px-5 py-4 space-y-2.5 ' + (state.settings?.wallpaper || 'wp-default');
@@ -1032,9 +1151,32 @@
         document.getElementById('activeChatSubtitle').textContent = `Групповой чат · ${count} уч.`;
       } else {
         const peer = getCurrentUsers().find(u => u.id === chat.peerId);
-        document.getElementById('activeChatSubtitle').textContent = peer?.online ? 'в сети' : (peer?.handle || 'личный чат');
+        document.getElementById('activeChatSubtitle').textContent = peer ? formatLastSeen(peer) : 'личный чат';
       }
 
+      // Group Voice Room header button & bar
+      const vrBtn = document.getElementById('voiceRoomBtn');
+      const vrBar = document.getElementById('voiceRoomBar');
+      if (chat.type === 'group') {
+        vrBtn.classList.remove('hidden');
+        const vrMap = chat.voiceRoom || {};
+        const vrNames = Object.values(vrMap).map(v => v.name);
+        document.getElementById('voiceRoomCount').textContent = vrNames.length;
+        document.getElementById('voiceRoomMembersText').textContent = vrNames.length > 0 ? 'В комнате: ' + vrNames.join(', ') : 'Пока никого нет — нажмите Войти';
+        const inRoom = !!vrMap[state.me.id];
+        document.getElementById('voiceRoomJoinBtn').textContent = inRoom ? 'Выйти' : 'Войти';
+        document.getElementById('voiceRoomJoinBtn').className = inRoom
+          ? 'px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold shadow-sm transition'
+          : 'px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-sm transition';
+        document.getElementById('voiceRoomMuteBtn').classList.toggle('hidden', !inRoom);
+      } else {
+        vrBtn.classList.add('hidden');
+        vrBar.classList.add('hidden');
+      }
+
+      if (chat.watchVideo && document.getElementById('watchTogetherBar').classList.contains('hidden')) {
+        openWatchTogetherBar(chat.watchVideo);
+      }
       // Pinned bar
       const pinnedBar = document.getElementById('pinnedBar');
       if (chat.pinnedMessage) {
@@ -1085,11 +1227,34 @@
               const isSel = multiSelectMode && selectedMsgIds.has(m.id);
               return `<div id="msg_${escapeHtml(m.id)}" data-bubble-msg="${escapeHtml(m.id)}" class="msg-bubble max-w-[82%] sm:max-w-[70%] ${shapeCls} shadow-sm ${isSel ? 'ring-2 ring-amber-400 scale-[0.98]' : ''} ${isMe ? (state.settings?.bubbleColor || 'bg-indigo-600') + ' text-white rounded-br-md' : 'bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-200/70 dark:border-slate-700 rounded-bl-md'}">`;
             })()}
-                ${m.forwardedFrom ? `<p class="text-[10px] italic opacity-80 mb-0.5">↪ Переслано от ${escapeHtml(m.forwardedFrom)}</p>` : ''}${m.replyTo ? `<button type="button" data-scroll-msg="${escapeHtml(m.replyTo.id)}" class="scroll-to-msg block w-full text-left mb-1.5 pl-2 border-l-2 ${isMe ? 'border-white/70 bg-black/15' : 'border-indigo-500 bg-slate-100 dark:bg-slate-900/60'} rounded-r-lg py-1 pr-2"><p class="text-[10px] font-bold opacity-90">${escapeHtml(m.replyTo.senderName)}</p><p class="text-[11px] opacity-80 truncate">${escapeHtml(m.replyTo.text || 'Медиа')}</p></button>` : ''}${m.audio ? `<audio controls src="${m.audio}" class="w-56 max-w-full h-9 my-1"></audio>` : ''}${m.contactCard ? `<div class="my-1 p-2.5 rounded-xl ${isMe ? 'bg-black/20' : 'bg-slate-100 dark:bg-slate-900'} flex items-center gap-2.5 min-w-[200px]"><div class="w-10 h-10 rounded-full ${escapeHtml(m.contactCard.avatarColor || 'bg-indigo-600')} text-white flex items-center justify-center font-bold text-xs overflow-hidden shrink-0">${m.contactCard.avatarImage ? `<img src="${m.contactCard.avatarImage}" class="w-full h-full object-cover" />` : escapeHtml(getInitials(m.contactCard.name))}</div><div class="min-w-0 flex-1"><p class="text-xs font-bold truncate">${escapeHtml(m.contactCard.name)}</p><p class="text-[10px] opacity-80 truncate">${escapeHtml(m.contactCard.handle)}</p></div><button type="button" data-open-contact="${escapeHtml(m.contactCard.id)}" class="open-contact-card-btn px-2.5 py-1 rounded-lg bg-indigo-500 text-white text-[11px] font-semibold shrink-0 hover:bg-indigo-600">Написать</button></div>` : ''}${!isMe && chat.type === 'group' ? `<p class="text-[11px] font-semibold mb-1 ${isMe ? 'text-indigo-100' : 'text-indigo-600 dark:text-indigo-400'}">${escapeHtml(m.senderName || 'Участник')}</p>` : ''}${isMe && isCreator() ? `<p class="text-[10px] font-bold text-amber-300 mb-0.5">👑 Создатель</p>` : ''}
-                ${m.images && m.images.length > 0 ? `<div class="grid ${m.images.length === 1 ? 'grid-cols-1' : 'grid-cols-2'} gap-1.5 mb-1.5">${m.images.map(src => `<img src="${src}" alt="Фото" data-lightbox-src="${src}" class="chat-image block rounded-xl max-h-56 w-full object-cover cursor-pointer hover:opacity-95 hover:scale-[1.02] transition-transform duration-200" />`).join('')}</div>` : (m.image ? `<img src="${m.image}" alt="Фото" data-lightbox-src="${m.image}" class="chat-image block rounded-xl max-h-72 max-w-full w-auto h-auto object-cover mb-1.5 cursor-pointer hover:opacity-95 transition" />` : '')}
+                ${m.forwardedFrom ? `<p class="text-[10px] italic opacity-80 mb-0.5">↪ Переслано от ${escapeHtml(m.forwardedFrom)}</p>` : ''}${m.replyTo ? `<button type="button" data-scroll-msg="${escapeHtml(m.replyTo.id)}" class="scroll-to-msg block w-full text-left mb-1.5 pl-2 border-l-2 ${isMe ? 'border-white/70 bg-black/15' : 'border-indigo-500 bg-slate-100 dark:bg-slate-900/60'} rounded-r-lg py-1 pr-2"><p class="text-[10px] font-bold opacity-90">${escapeHtml(m.replyTo.senderName)}</p><p class="text-[11px] opacity-80 truncate">${escapeHtml(m.replyTo.text || 'Медиа')}</p></button>` : ''}${m.audio ? `<div class="flex items-center gap-1.5 my-1"><audio controls src="${m.audio}" class="w-48 max-w-full h-9"></audio><button type="button" class="audio-speed-btn px-2 py-1 rounded-lg bg-black/15 hover:bg-black/25 text-[10px] font-bold shrink-0" title="Скорость">1x</button></div>` : ''}${m.contactCard ? `<div class="my-1 p-2.5 rounded-xl ${isMe ? 'bg-black/20' : 'bg-slate-100 dark:bg-slate-900'} flex items-center gap-2.5 min-w-[200px]"><div class="w-10 h-10 rounded-full ${escapeHtml(m.contactCard.avatarColor || 'bg-indigo-600')} text-white flex items-center justify-center font-bold text-xs overflow-hidden shrink-0">${m.contactCard.avatarImage ? `<img src="${m.contactCard.avatarImage}" class="w-full h-full object-cover" />` : escapeHtml(getInitials(m.contactCard.name))}</div><div class="min-w-0 flex-1"><p class="text-xs font-bold truncate">${escapeHtml(m.contactCard.name)}</p><p class="text-[10px] opacity-80 truncate">${escapeHtml(m.contactCard.handle)}</p></div><button type="button" data-open-contact="${escapeHtml(m.contactCard.id)}" class="open-contact-card-btn px-2.5 py-1 rounded-lg bg-indigo-500 text-white text-[11px] font-semibold shrink-0 hover:bg-indigo-600">Написать</button></div>` : ''}${!isMe && chat.type === 'group' ? (() => {
+                  const role = (chat.roles || {})[m.senderId] || 'member';
+                  const rBadge = role === 'owner' ? '<span class="ml-1 px-1 py-0.2 rounded bg-amber-400/20 text-amber-500 text-[9px]">👑 Владелец</span>' : (role === 'mod' ? '<span class="ml-1 px-1 py-0.2 rounded bg-emerald-400/20 text-emerald-500 text-[9px]">🛡 Мод</span>' : '');
+                  return `<p class="text-[11px] font-semibold mb-1 text-indigo-600 dark:text-indigo-400">${escapeHtml(m.senderName || 'Участник')}${rBadge}</p>`;
+                })() : ''}${isMe && isCreator() ? `<p class="text-[10px] font-bold text-amber-300 mb-0.5">👑 Создатель</p>` : ''}
+                ${(() => {
+                  const arr = (m.images && m.images.length > 0) ? m.images : (m.image ? [m.image] : []);
+                  if (arr.length === 0) return '';
+                  if (state.settings?.lowDataMode) {
+                    return `<button type="button" data-reveal-imgs="${escapeHtml(m.id)}" class="reveal-lowdata-btn w-full my-1 p-3 rounded-xl ${isMe ? 'bg-black/20 hover:bg-black/30' : 'bg-slate-100 dark:bg-slate-900 hover:bg-slate-200'} flex items-center gap-2.5 text-left transition"><span class="text-lg">🖼️</span><div class="min-w-0 flex-1"><p class="text-xs font-semibold">Фото (${arr.length})</p><p class="text-[10px] opacity-75">Экономия трафика · Нажмите, чтобы открыть</p></div></button>`;
+                  }
+                  if (arr.length > 1) {
+                    return `<div class="grid grid-cols-2 gap-1.5 mb-1.5">${arr.map(src => `<img loading="lazy" src="${src}" alt="Фото" data-lightbox-src="${src}" class="chat-image block rounded-xl max-h-56 w-full object-cover cursor-pointer hover:opacity-95 hover:scale-[1.02] transition-transform duration-200" />`).join('')}</div>`;
+                  }
+                  return `<img loading="lazy" src="${arr[0]}" alt="Фото" data-lightbox-src="${arr[0]}" class="chat-image block rounded-xl max-h-72 max-w-full w-auto h-auto object-cover mb-1.5 cursor-pointer hover:opacity-95 transition" />`;
+                })()}
                 ${m.sticker ? `<div class="sticker-pop text-5xl leading-none py-1 select-none">${escapeHtml(m.sticker)}</div>` : ''}
                 ${m.stickerImg ? `<img src="${m.stickerImg}" alt="Стикер котик" class="sticker-pop block w-28 h-28 object-contain rounded-xl my-1 select-none" />` : ''}
-                ${m.text ? `<p class="${(state.settings?.fontSize === 'sm' ? 'text-xs' : state.settings?.fontSize === 'lg' ? 'text-base' : 'text-sm')} whitespace-pre-wrap break-words leading-relaxed">${escapeHtml(m.text)}</p>` : ''}
+                ${m.file ? `<a href="${m.file.dataUrl}" download="${escapeHtml(m.file.name)}" class="flex items-center gap-2.5 p-2 rounded-xl my-1 ${isMe ? 'bg-black/20 hover:bg-black/30' : 'bg-slate-100 dark:bg-slate-900 hover:bg-slate-200'} transition"><span class="text-xl">📄</span><div class="min-w-0 flex-1"><p class="text-xs font-semibold truncate">${escapeHtml(m.file.name)}</p><p class="text-[10px] opacity-75">${escapeHtml(m.file.sizeKb)} КБ · Скачать</p></div></a>` : ''}
+                ${m.text ? `<p class="${(state.settings?.fontSize === 'sm' ? 'text-xs' : state.settings?.fontSize === 'lg' ? 'text-base' : 'text-sm')} whitespace-pre-wrap break-words leading-relaxed">${formatMessageText(m.text)}</p>` : ''}
+                ${(() => {
+                  const url = extractFirstUrl(m.text);
+                  if (!url) return '';
+                  let host = url;
+                  try { host = new URL(url).hostname; } catch (e) {}
+                  const isVid = /youtube\.com|youtu\.be|tiktok\.com|vimeo\.com|rutube\.ru|twitch\.tv|\.(mp4|webm)(\?|$)/i.test(url);
+                  return `<div class="mt-1.5 flex items-center gap-1.5"><a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" class="flex-1 min-w-0 flex items-center gap-2 p-2 rounded-xl text-xs ${isMe ? 'bg-black/20 hover:bg-black/30 text-white' : 'bg-slate-100 dark:bg-slate-900 hover:bg-indigo-50 text-slate-800 dark:text-slate-200'} transition"><span class="text-sm">🔗</span><span class="truncate font-medium">${escapeHtml(host)}</span><span class="ml-auto text-[10px] opacity-75">↗</span></a>${isVid ? `<button type="button" data-watch-url="${escapeHtml(url)}" class="watch-together-btn px-2.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-semibold shrink-0 transition" title="Смотреть вместе">▶</button>` : ''}</div>`;
+                })()}
                 <div class="flex items-end justify-between gap-2 mt-1">
                   <div class="flex items-center gap-1 flex-wrap">
                     ${Object.entries(m.reactions || {}).filter(([, arr]) => arr.length > 0).map(([emo, arr]) => `<button type="button" data-msg-id="${escapeHtml(m.id)}" data-react="${escapeHtml(emo)}" class="react-chip text-[11px] px-1.5 py-0.5 rounded-full ${arr.includes(state.me.id) ? 'bg-indigo-500/30 ring-1 ring-white/40' : 'bg-black/10 dark:bg-white/10'}">${escapeHtml(emo)} ${arr.length}</button>`).join('')}
@@ -1208,6 +1373,7 @@
         createdAt: Date.now()
       };
 
+      if (text) triggerKeywordEffect(text);
       messageInput.value = '';
       messageInput.style.height = 'auto';
       clearPendingImage();
@@ -1418,7 +1584,7 @@
           <div class="max-w-[95%] px-3.5 py-2.5 rounded-2xl text-sm leading-relaxed ${m.role === 'user' ? 'bg-indigo-600 text-white' : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 gem-md'}">
             ${m.image ? `<img src="${m.image}" alt="Фото задания" class="rounded-xl max-h-40 mb-1.5 object-cover" />` : ''}
             ${m.role === 'user' ? `<p class="whitespace-pre-wrap break-words">${escapeHtml(m.text)}</p>` : renderGeminiMarkdown(m.text)}
-            ${m.role === 'model' && idx > 0 ? `<div class="mt-1.5 flex items-center gap-3"><button type="button" data-gem-idx="${idx}" class="gem-to-chat-btn text-[10px] font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">↪ Отправить в чат</button><button type="button" data-gem-copy="${idx}" class="gem-copy-btn text-[10px] font-semibold text-slate-500 hover:text-indigo-600">📋 Копировать</button></div>` : ''}
+            ${m.role === 'model' && idx > 0 ? `<div class="mt-1.5 flex items-center gap-3"><button type="button" data-gem-idx="${idx}" class="gem-to-chat-btn text-[10px] font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">↪ Отправить в чат</button><button type="button" data-gem-copy="${idx}" class="gem-copy-btn text-[10px] font-semibold text-slate-500 hover:text-indigo-600">📋 Копировать</button><button type="button" data-gem-png="${idx}" class="gem-png-btn text-[10px] font-semibold text-slate-500 hover:text-emerald-600">🖼 Картинка</button></div>` : ''}
           </div>
         </div>
       `).join('') + (isThinking ? `
@@ -1431,6 +1597,44 @@
         </div>
       ` : '');
       box.scrollTop = box.scrollHeight;
+      box.querySelectorAll('.gem-png-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const item = geminiHistory[Number(btn.dataset.gemPng)];
+          if (!item) return;
+          const canvas = document.createElement('canvas');
+          const W = 720;
+          const ctx = canvas.getContext('2d');
+          ctx.font = '16px Inter, sans-serif';
+          const words = String(item.text || '').replace(/\*\*/g, '').split(/\s+/);
+          const lines = [];
+          let line = '';
+          for (const w of words) {
+            const test = line ? line + ' ' + w : w;
+            if (ctx.measureText(test).width > W - 80) { lines.push(line); line = w; }
+            else line = test;
+          }
+          if (line) lines.push(line);
+          const H = Math.max(220, 110 + lines.length * 24);
+          canvas.width = W;
+          canvas.height = H;
+          const grad = ctx.createLinearGradient(0, 0, W, H);
+          grad.addColorStop(0, '#0f172a');
+          grad.addColorStop(1, '#312e81');
+          ctx.fillStyle = grad;
+          ctx.fillRect(0, 0, W, H);
+          ctx.fillStyle = '#a5b4fc';
+          ctx.font = 'bold 20px Inter, sans-serif';
+          ctx.fillText('✦ PulseChat · Ответ Gemini', 40, 48);
+          ctx.fillStyle = '#f8fafc';
+          ctx.font = '16px Inter, sans-serif';
+          lines.forEach((l, i) => ctx.fillText(l, 40, 88 + i * 24));
+          const a = document.createElement('a');
+          a.href = canvas.toDataURL('image/png');
+          a.download = 'gemini-pulsechat.png';
+          a.click();
+          showToast('Картинка сохранена!');
+        });
+      });
       box.querySelectorAll('.gem-copy-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           const item = geminiHistory[Number(btn.dataset.gemCopy)];
@@ -1688,6 +1892,16 @@
               <input id="setDarkTheme" type="checkbox" ${isDark ? 'checked' : ''} class="w-4 h-4 accent-indigo-600 rounded" />
             </label>
             <div class="px-3.5 py-3 flex items-center justify-between gap-3">
+              <span class="text-sm font-medium">Акцентный цвет интерфейса</span>
+              <select id="setAccentTheme" class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-xs font-medium focus:outline-none">
+                <option value="accent-indigo" ${(cfg.accentTheme || 'accent-indigo') === 'accent-indigo' ? 'selected' : ''}>Индиго</option>
+                <option value="accent-emerald" ${cfg.accentTheme === 'accent-emerald' ? 'selected' : ''}>Изумруд</option>
+                <option value="accent-cyan" ${cfg.accentTheme === 'accent-cyan' ? 'selected' : ''}>Неоновый циан</option>
+                <option value="accent-rose" ${cfg.accentTheme === 'accent-rose' ? 'selected' : ''}>Розовый</option>
+                <option value="accent-amber" ${cfg.accentTheme === 'accent-amber' ? 'selected' : ''}>Золотой</option>
+              </select>
+            </div>
+            <div class="px-3.5 py-3 flex items-center justify-between gap-3">
               <span class="text-sm font-medium">Обои чата</span>
               <select id="setWallpaper" class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-xs font-medium focus:outline-none">
                 <option value="wp-default" ${(cfg.wallpaper || 'wp-default') === 'wp-default' ? 'selected' : ''}>Стандартные</option>
@@ -1728,6 +1942,10 @@
               <input id="setEnterSend" type="checkbox" ${cfg.enterToSend !== false ? 'checked' : ''} class="w-4 h-4 accent-indigo-600 rounded" />
             </label>
             <label class="px-3.5 py-3 flex items-center justify-between gap-3 cursor-pointer">
+              <span class="text-sm font-medium">Экономия трафика (слабый интернет)</span>
+              <input id="setLowDataMode" type="checkbox" ${cfg.lowDataMode ? 'checked' : ''} class="w-4 h-4 accent-indigo-600 rounded" />
+            </label>
+            <label class="px-3.5 py-3 flex items-center justify-between gap-3 cursor-pointer">
               <span class="text-sm font-medium">Уведомления в браузере</span>
               <input id="setBrowserNotifs" type="checkbox" ${cfg.browserNotifications ? 'checked' : ''} class="w-4 h-4 accent-indigo-600 rounded" />
             </label>
@@ -1750,6 +1968,10 @@
             <button id="settingsFullscreenBtn" type="button" class="w-full px-3.5 py-3 flex items-center justify-between gap-3 text-left hover:bg-slate-50 dark:hover:bg-slate-800/60 transition">
               <span class="text-sm font-medium">Полноэкранный режим (скрыть кнопки Android)</span>
               <span class="text-xs text-indigo-600 font-semibold">⛶</span>
+            </button>
+            <button id="settingsAllDocsBtn" type="button" class="w-full px-3.5 py-3 flex items-center justify-between gap-3 text-left hover:bg-slate-50 dark:hover:bg-slate-800/60 transition">
+              <span class="text-sm font-medium">📁 Все файлы и документы</span>
+              <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
             </button>
             <button id="settingsOpenInstallBtn" type="button" class="w-full px-3.5 py-3 flex items-center justify-between gap-3 text-left hover:bg-slate-50 dark:hover:bg-slate-800/60 transition">
               <span class="text-sm font-medium">Добавить на экран телефона</span>
@@ -1805,6 +2027,13 @@
     checkAuthGate();
       });
 
+      document.getElementById('setAccentTheme').addEventListener('change', (e) => {
+        if (!state.settings) state.settings = {};
+        state.settings.accentTheme = e.target.value;
+        saveState();
+        applyAccentTheme();
+        showToast('Акцентный цвет обновлён');
+      });
       document.getElementById('setWallpaper').addEventListener('change', (e) => {
         if (!state.settings) state.settings = {};
         state.settings.wallpaper = e.target.value;
@@ -1835,6 +2064,38 @@
         if (!state.settings) state.settings = {};
         state.settings.enterToSend = e.target.checked;
         saveState();
+      });
+
+      document.getElementById('setLowDataMode').addEventListener('change', (e) => {
+        if (!state.settings) state.settings = {};
+        state.settings.lowDataMode = e.target.checked;
+        saveState();
+        messagesContainer.dataset.renderSig = '';
+        renderActiveChat();
+        showToast(e.target.checked ? 'Экономия трафика включена' : 'Обычный режим загрузки');
+      });
+
+      document.getElementById('settingsAllDocsBtn').addEventListener('click', () => {
+        const docs = [];
+        getCurrentChats().forEach(c => {
+          getChatMessages(c.id).forEach(m => {
+            if (m.file) docs.push({ chatTitle: c.title, file: m.file, createdAt: m.createdAt });
+          });
+        });
+        openModal('📁 Все файлы и документы (' + docs.length + ')', `
+          <div class="space-y-2 max-h-80 overflow-y-auto">
+            ${docs.length === 0 ? '<p class="text-xs text-slate-400 text-center py-6">Отправленных файлов пока нет</p>' : docs.map(d => `
+              <a href="${d.file.dataUrl}" download="${escapeHtml(d.file.name)}" class="flex items-center gap-3 p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-slate-700 transition">
+                <span class="text-xl">📄</span>
+                <div class="min-w-0 flex-1">
+                  <p class="text-xs font-semibold truncate">${escapeHtml(d.file.name)}</p>
+                  <p class="text-[10px] text-slate-500 truncate">${escapeHtml(d.chatTitle)} · ${escapeHtml(d.file.sizeKb)} КБ</p>
+                </div>
+                <span class="text-xs font-semibold text-indigo-600">Скачать</span>
+              </a>
+            `).join('')}
+          </div>
+        `);
       });
 
       document.getElementById('setBrowserNotifs').addEventListener('change', async (e) => {
@@ -2400,14 +2661,33 @@
           if (id === state.me.id) return state.me;
           return users.find(u => u.id === id) || { name: 'Участник', handle: id };
         });
+        const nonMembers = users.filter(u => !(chat.members || []).includes(u.id));
         openModal('Информация о группе', `
           <div class="flex items-center gap-3">
-            <div class="w-14 h-14 rounded-full ${escapeHtml(chat.avatarColor || 'bg-violet-600')} text-white flex items-center justify-center font-bold text-lg shrink-0">ГР</div>
-            <div class="min-w-0">
+            <div class="w-14 h-14 rounded-full ${escapeHtml(chat.avatarColor || 'bg-violet-600')} text-white flex items-center justify-center font-bold text-lg shrink-0 overflow-hidden">
+              ${chat.avatarImage ? `<img src="${chat.avatarImage}" class="w-full h-full object-cover" />` : 'ГР'}
+            </div>
+            <div class="min-w-0 flex-1">
               <h4 class="font-bold text-base truncate">${escapeHtml(chat.title)}</h4>
               <p class="text-xs text-slate-500">${escapeHtml(chat.description || 'Групповой чат')}</p>
+              <label class="inline-block mt-1 cursor-pointer text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">
+                📷 Сменить фото группы
+                <input id="groupAvatarUpload" type="file" accept="image/*" class="hidden" />
+              </label>
             </div>
           </div>
+          <form id="renameGroupForm" class="flex gap-2">
+            <input id="renameGroupInput" type="text" required value="${escapeHtml(chat.title)}" placeholder="Название группы" class="flex-1 px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs focus:outline-none" />
+            <button type="submit" class="px-3 py-2 rounded-xl bg-indigo-600 text-white text-xs font-semibold">Переименовать</button>
+          </form>
+          ${nonMembers.length > 0 ? `
+            <form id="addGroupMemberForm" class="flex gap-2">
+              <select id="addGroupMemberSelect" class="flex-1 px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs focus:outline-none">
+                ${nonMembers.map(u => `<option value="${escapeHtml(u.id)}">${escapeHtml(u.name)} (${escapeHtml(u.handle)})</option>`).join('')}
+              </select>
+              <button type="submit" class="px-3 py-2 rounded-xl bg-emerald-600 text-white text-xs font-semibold">+ Добавить</button>
+            </form>
+          ` : ''}
           <div class="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-between gap-2">
             <div class="min-w-0">
               <p class="text-[11px] text-slate-500">ID группы для приглашения друзей</p>
@@ -2424,11 +2704,81 @@
             <p class="text-xs font-semibold text-slate-500 mb-2">Участники (${membersList.length + (state.mode === 'demo' ? 1 : 0)})</p>
             <div class="space-y-1.5">
               ${state.mode === 'demo' ? `<div class="p-2 rounded-xl bg-slate-50 dark:bg-slate-800/60 text-xs font-medium">${escapeHtml(state.me.name)} (${escapeHtml(state.me.handle)}) — Вы</div>` : ''}
-              ${membersList.map(m => `<div class="p-2 rounded-xl bg-slate-50 dark:bg-slate-800/60 text-xs font-medium">${escapeHtml(m.name)} <span class="text-slate-400">${escapeHtml(m.handle || '')}</span></div>`).join('')}
+              ${membersList.map(m => {
+                const r = (chat.roles || {})[m.id] || 'member';
+                const rTxt = r === 'owner' ? '👑 Владелец' : (r === 'mod' ? '🛡 Модератор' : 'Участник');
+                return `<div class="p-2 rounded-xl bg-slate-50 dark:bg-slate-800/60 text-xs font-medium flex items-center justify-between gap-2">
+                  <span class="truncate">${escapeHtml(m.name)} <span class="text-slate-400">${escapeHtml(m.handle || '')}</span></span>
+                  ${m.id !== state.me.id ? `<button type="button" data-role-uid="${escapeHtml(m.id)}" class="toggle-role-btn px-2 py-0.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-[10px] font-semibold shrink-0">${rTxt}</button>` : `<span class="text-[10px] text-amber-500 font-semibold">${rTxt}</span>`}
+                </div>`;
+              }).join('')}
             </div>
           </div>
         `);
         document.getElementById('copyGroupInviteBtn')?.addEventListener('click', () => copyText(chat.id));
+        document.getElementById('groupAvatarUpload')?.addEventListener('change', async (ev) => {
+          const file = ev.target.files?.[0];
+          if (!file) return;
+          try {
+            const { dataUrl } = await compressImageFile(file, 192, 0.72);
+            if (state.mode === 'firebase' && fbDb) {
+              await updateDoc(doc(fbDb, 'chats', chat.id), { avatarImage: dataUrl });
+            } else {
+              chat.avatarImage = dataUrl;
+              saveState();
+              renderChatList();
+              renderActiveChat();
+            }
+            showChatDetailsModal();
+            showToast('Аватарка группы обновлена');
+          } catch (err) { showToast(err.message); }
+        });
+        document.getElementById('renameGroupForm')?.addEventListener('submit', async (ev) => {
+          ev.preventDefault();
+          const newTitle = document.getElementById('renameGroupInput').value.trim();
+          if (!newTitle) return;
+          if (state.mode === 'firebase' && fbDb) {
+            await updateDoc(doc(fbDb, 'chats', chat.id), { title: newTitle });
+          } else {
+            chat.title = newTitle;
+            saveState();
+            renderChatList();
+            renderActiveChat();
+          }
+          showChatDetailsModal();
+          showToast('Группа переименована');
+        });
+        modalBody.querySelectorAll('.toggle-role-btn').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const uid = btn.dataset.roleUid;
+            const roles = { ...(chat.roles || {}) };
+            roles[uid] = roles[uid] === 'mod' ? 'member' : 'mod';
+            if (state.mode === 'firebase' && fbDb) {
+              await updateDoc(doc(fbDb, 'chats', chat.id), { roles }).catch(() => {});
+            } else {
+              chat.roles = roles;
+              saveState();
+              renderActiveChat();
+            }
+            showChatDetailsModal();
+            showToast('Роль участника обновлена');
+          });
+        });
+        document.getElementById('addGroupMemberForm')?.addEventListener('submit', async (ev) => {
+          ev.preventDefault();
+          const uid = document.getElementById('addGroupMemberSelect').value;
+          if (!uid) return;
+          if (state.mode === 'firebase' && fbDb) {
+            await updateDoc(doc(fbDb, 'chats', chat.id), { members: arrayUnion(uid) });
+          } else {
+            if (!chat.members) chat.members = [];
+            if (!chat.members.includes(uid)) chat.members.push(uid);
+            saveState();
+            renderActiveChat();
+          }
+          showChatDetailsModal();
+          showToast('Участник добавлен');
+        });
         const cqr = document.getElementById('chatQrContainer');
         if (cqr && window.QRCode) new QRCode(cqr, { text: chat.id, width: 100, height: 100 });
       } else {
@@ -2441,11 +2791,30 @@
             </div>
             <h4 class="font-bold text-base">${escapeHtml(peer.name)}</h4>
             <p class="text-xs text-indigo-600 dark:text-indigo-400 font-medium">${escapeHtml(peer.handle || '')}</p>
+            <p class="text-[11px] font-medium text-emerald-600 dark:text-emerald-400">${escapeHtml(formatLastSeen(peer))}</p>
             <p class="text-xs text-slate-500 dark:text-slate-300">${escapeHtml(peer.bio || 'На связи')}</p>
           </div>
           ${statsAndMediaHtml}
-          ${chat.peerId ? `<button id="toggleBlockUserBtn" type="button" class="w-full py-2 rounded-xl ${isBlocked ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 dark:bg-rose-950/40 text-rose-600'} text-xs font-semibold transition">${isBlocked ? 'Разблокировать контакт' : 'Заблокировать (в чёрный список)'}</button>` : ''}
+          ${chat.peerId ? `
+            <form id="aliasForm" class="flex gap-2">
+              <input id="aliasInput" type="text" placeholder="Своё имя для контакта (только у вас)" value="${escapeHtml((state.contactAliases || {})[chat.peerId] || '')}" class="flex-1 px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs focus:outline-none" />
+              <button type="submit" class="px-3 py-2 rounded-xl bg-indigo-600 text-white text-xs font-semibold">Сохранить</button>
+            </form>
+            <button id="toggleBlockUserBtn" type="button" class="w-full py-2 rounded-xl ${isBlocked ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 dark:bg-rose-950/40 text-rose-600'} text-xs font-semibold transition">${isBlocked ? 'Разблокировать контакт' : 'Заблокировать (в чёрный список)'}</button>
+          ` : ''}
         `);
+        document.getElementById('aliasForm')?.addEventListener('submit', (ev) => {
+          ev.preventDefault();
+          if (!state.contactAliases) state.contactAliases = {};
+          const val = document.getElementById('aliasInput').value.trim();
+          if (val) state.contactAliases[chat.peerId] = val;
+          else delete state.contactAliases[chat.peerId];
+          saveState();
+          renderChatList();
+          renderActiveChat();
+          showChatDetailsModal();
+          showToast('Имя контакта обновлено');
+        });
         document.getElementById('toggleBlockUserBtn')?.addEventListener('click', () => {
           if (!state.blockedUsers) state.blockedUsers = [];
           if (isBlocked) {
@@ -2629,6 +2998,7 @@
         avatarColor: state.me.avatarColor,
         bannerColor: state.me.bannerColor || 'from-indigo-600 to-purple-600',
         online: state.settings?.showOnline !== false,
+        lastSeen: Date.now(),
         updatedAt: Date.now()
       };
       if (state.me.avatarImage) {
@@ -2691,7 +3061,7 @@
     function subscribeMessages(chatId) {
       if (unsubMessages) { unsubMessages(); unsubMessages = null; }
       if (!fbDb || !chatId) return;
-      const qMsgs = query(collection(fbDb, 'chats', chatId, 'messages'), orderBy('createdAt', 'asc'), limitToLast(80));
+      const qMsgs = query(collection(fbDb, 'chats', chatId, 'messages'), orderBy('createdAt', 'asc'), limitToLast(state.settings?.lowDataMode ? 35 : 80));
       let firstBatch = true;
       unsubMessages = onSnapshot(qMsgs, (snap) => {
         const prevLen = (fbMessagesMap[chatId] || []).length;
@@ -2699,6 +3069,7 @@
         if (!firstBatch && fbMessagesMap[chatId].length > prevLen) {
           const newest = fbMessagesMap[chatId][fbMessagesMap[chatId].length - 1];
           if (newest && newest.senderId !== state.me.id) {
+            if (newest.text) triggerKeywordEffect(newest.text);
             playPopSound();
             if (state.settings?.browserNotifications && document.hidden && typeof Notification !== 'undefined' && Notification.permission === 'granted' && !(state.mutedChats || []).includes(chatId)) {
               try { new Notification(newest.senderName || 'Новое сообщение', { body: newest.text || 'Медиа-сообщение' }); } catch (e) {}
@@ -2806,7 +3177,7 @@
         pendingImages = [];
         let totalKb = 0;
         for (const file of files) {
-          const { dataUrl, sizeKb } = await compressImageFile(file, 640, 0.7);
+          const { dataUrl, sizeKb } = await compressImageFile(file, state.settings?.lowDataMode ? 480 : 640, state.settings?.lowDataMode ? 0.55 : 0.7);
           pendingImages.push(dataUrl);
           totalKb += sizeKb;
         }
@@ -3105,6 +3476,7 @@
         const mm = String(Math.floor(callSeconds / 60)).padStart(2, '0');
         const ss = String(callSeconds % 60).padStart(2, '0');
         document.getElementById('callStatusText').textContent = `${mm}:${ss}`;
+        document.getElementById('minCallTimer').textContent = `${mm}:${ss}`;
       }, 1000);
     }
 
@@ -3245,6 +3617,7 @@
       remoteVideoEl.classList.add('hidden');
       callAvatarFallback.classList.remove('hidden');
       callOverlay.classList.add('hidden');
+      document.getElementById('minimizedCallBar').classList.add('hidden');
       if (notifyRemote && currentCallDocId && state.mode === 'firebase' && fbDb) {
         await deleteDoc(doc(fbDb, 'chats', currentCallDocId, 'calls', 'active')).catch(() => {});
       }
@@ -3254,6 +3627,22 @@
     document.getElementById('audioCallBtn').addEventListener('click', () => startCall(false));
     document.getElementById('videoCallBtn').addEventListener('click', () => startCall(true));
     document.getElementById('endCallBtn').addEventListener('click', () => endCall(true));
+    document.getElementById('minEndCallBtn').addEventListener('click', () => endCall(true));
+    document.getElementById('minimizeCallBtn').addEventListener('click', () => {
+      document.getElementById('minCallName').textContent = document.getElementById('callPeerName').textContent;
+      callOverlay.classList.add('hidden');
+      document.getElementById('minimizedCallBar').classList.remove('hidden');
+    });
+    document.getElementById('restoreCallBtn').addEventListener('click', () => {
+      document.getElementById('minimizedCallBar').classList.add('hidden');
+      callOverlay.classList.remove('hidden');
+    });
+    document.getElementById('markAllReadBtn').addEventListener('click', () => {
+      getCurrentChats().forEach(c => { c.unread = 0; });
+      if (state.mode === 'demo') saveState();
+      renderChatList();
+      showToast('Все чаты отмечены прочитанными');
+    });
     document.getElementById('toggleMicBtn').addEventListener('click', () => {
       micMuted = !micMuted;
       if (localStream) localStream.getAudioTracks().forEach(t => { t.enabled = !micMuted; });
@@ -4031,6 +4420,353 @@
       });
     });
 
+    // Draggable / Resizable Call Overlay Handle (smoothly pull up/down to type in chat!)
+    const callResizeHandle = document.getElementById('callResizeHandle');
+    let isDraggingCall = false;
+    callResizeHandle.addEventListener('pointerdown', (e) => {
+      isDraggingCall = true;
+      callOverlay.style.transition = 'none';
+      callResizeHandle.setPointerCapture(e.pointerId);
+    });
+    window.addEventListener('pointermove', (e) => {
+      if (!isDraggingCall) return;
+      const minH = 210;
+      const maxH = window.innerHeight;
+      const h = Math.max(minH, Math.min(maxH, e.clientY + 12));
+      callOverlay.style.height = h + 'px';
+    });
+    window.addEventListener('pointerup', () => {
+      if (!isDraggingCall) return;
+      isDraggingCall = false;
+      callOverlay.style.transition = '';
+    });
+
+    // Screen Share (1080p / 720p / 480p adaptive) in 1-on-1 Call
+    let screenStream = null;
+    async function tuneVideoSenderBitrate(sender, qualityH) {
+      if (!sender || !sender.getParameters) return;
+      try {
+        const params = sender.getParameters();
+        if (!params.encodings || params.encodings.length === 0) params.encodings = [{}];
+        const bps = qualityH >= 1080 ? 3500000 : (qualityH >= 720 ? 1800000 : 900000);
+        params.encodings[0].maxBitrate = bps;
+        params.encodings[0].maxFramerate = qualityH >= 1080 ? 30 : 24;
+        params.degradationPreference = 'maintain-resolution';
+        await sender.setParameters(params);
+      } catch (e) {}
+    }
+
+    document.getElementById('screenQualitySelect').addEventListener('change', async (e) => {
+      const q = Number(e.target.value) || 1080;
+      if (screenStream) {
+        const vTrack = screenStream.getVideoTracks()[0];
+        if (vTrack && vTrack.applyConstraints) {
+          await vTrack.applyConstraints({ height: { ideal: q }, frameRate: { ideal: q >= 1080 ? 30 : 24 } }).catch(() => {});
+        }
+        const sender = pc?.getSenders().find(s => s.track && s.track.kind === 'video');
+        if (sender) await tuneVideoSenderBitrate(sender, q);
+        showToast('Качество экрана: ' + q + 'p');
+      }
+    });
+
+    async function startScreenShareWithQuality(qualityH) {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
+        showToast('Трансляция экрана поддерживается в браузере на ПК или через https');
+        return null;
+      }
+      const heights = [Number(qualityH) || 1080, 720, 480].filter((v, i, a) => a.indexOf(v) === i && v <= (Number(qualityH) || 1080));
+      for (const h of heights) {
+        try {
+          const st = await navigator.mediaDevices.getDisplayMedia({
+            video: { height: { ideal: h }, frameRate: { ideal: h >= 1080 ? 30 : 24 } },
+            audio: true
+          });
+          const vTrack = st.getVideoTracks()[0];
+          if (vTrack && 'contentHint' in vTrack) vTrack.contentHint = 'detail';
+          showToast('Трансляция экрана: ' + h + 'p');
+          return st;
+        } catch (err) {
+          if (err.name === 'NotAllowedError') { showToast('Доступ к экрану отменён'); return null; }
+        }
+      }
+      return null;
+    }
+
+    document.getElementById('shareScreenCallBtn').addEventListener('click', async () => {
+      if (screenStream) {
+        screenStream.getTracks().forEach(t => t.stop());
+        screenStream = null;
+        if (localStream && localStream.getVideoTracks().length > 0) {
+          localVideoEl.srcObject = localStream;
+          const sender = pc?.getSenders().find(s => s.track && s.track.kind === 'video');
+          if (sender) sender.replaceTrack(localStream.getVideoTracks()[0]).catch(() => {});
+        } else {
+          localVideoEl.classList.add('hidden');
+        }
+        showToast('Трансляция экрана остановлена');
+        return;
+      }
+      const q = Number(document.getElementById('screenQualitySelect').value) || 1080;
+      screenStream = await startScreenShareWithQuality(q);
+      if (!screenStream) return;
+      const sTrack = screenStream.getVideoTracks()[0];
+      localVideoEl.srcObject = screenStream;
+      localVideoEl.classList.remove('hidden');
+      if (pc && sTrack) {
+        let sender = pc.getSenders().find(s => s.track && s.track.kind === 'video');
+        if (sender) await sender.replaceTrack(sTrack).catch(() => {});
+        else sender = pc.addTrack(sTrack, screenStream);
+        await tuneVideoSenderBitrate(sender, q);
+      }
+      sTrack.onended = () => {
+        screenStream = null;
+        if (!localStream || localStream.getVideoTracks().length === 0) localVideoEl.classList.add('hidden');
+      };
+    });
+
+    // Group Voice Room (Real WebRTC Mesh Audio + Screen Share!)
+    let voiceRoomStream = null;
+    let voiceRoomMuted = false;
+    let voiceRoomPeers = {};
+    let unsubVoiceRoomSignals = null;
+    let activeVoiceRoomChatId = null;
+
+    function cleanupVoiceRoomMesh() {
+      if (unsubVoiceRoomSignals) { unsubVoiceRoomSignals(); unsubVoiceRoomSignals = null; }
+      Object.values(voiceRoomPeers).forEach(p => { try { p.close(); } catch (e) {} });
+      voiceRoomPeers = {};
+      const cont = document.getElementById('voiceRoomAudioContainer');
+      if (cont) cont.innerHTML = '';
+      activeVoiceRoomChatId = null;
+    }
+
+    function attachRemoteVoiceAudio(peerId, stream) {
+      const cont = document.getElementById('voiceRoomAudioContainer');
+      if (!cont) return;
+      let el = document.getElementById('vr_audio_' + peerId);
+      if (!el) {
+        el = document.createElement('audio');
+        el.id = 'vr_audio_' + peerId;
+        el.autoplay = true;
+        el.playsInline = true;
+        cont.appendChild(el);
+      }
+      el.srcObject = stream;
+    }
+
+    async function connectVoiceRoomMesh(chatId, vrMap) {
+      if (state.mode !== 'firebase' || !fbDb) return;
+      activeVoiceRoomChatId = chatId;
+      const peerIds = Object.keys(vrMap || {}).filter(id => id !== state.me.id);
+      const sigCol = collection(fbDb, 'chats', chatId, 'voiceRoomSignals');
+
+      if (!unsubVoiceRoomSignals) {
+        unsubVoiceRoomSignals = onSnapshot(sigCol, async (snap) => {
+          for (const ch of snap.docChanges()) {
+            if (ch.type !== 'added') continue;
+            const d = ch.doc.data();
+            if (d.to !== state.me.id) continue;
+            const from = d.from;
+            let peerConn = voiceRoomPeers[from];
+            if (!peerConn) {
+              peerConn = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
+              voiceRoomPeers[from] = peerConn;
+              if (voiceRoomStream) voiceRoomStream.getTracks().forEach(t => peerConn.addTrack(t, voiceRoomStream));
+              peerConn.ontrack = (ev) => attachRemoteVoiceAudio(from, ev.streams[0]);
+              peerConn.onicecandidate = (ev) => {
+                if (ev.candidate) addDoc(sigCol, { from: state.me.id, to: from, type: 'ice', candidate: ev.candidate.toJSON() });
+              };
+            }
+            if (d.type === 'offer') {
+              await peerConn.setRemoteDescription(new RTCSessionDescription(d.sdp));
+              const ans = await peerConn.createAnswer();
+              await peerConn.setLocalDescription(ans);
+              await addDoc(sigCol, { from: state.me.id, to: from, type: 'answer', sdp: { type: ans.type, sdp: ans.sdp } });
+            } else if (d.type === 'answer' && !peerConn.currentRemoteDescription) {
+              await peerConn.setRemoteDescription(new RTCSessionDescription(d.sdp));
+            } else if (d.type === 'ice' && d.candidate) {
+              peerConn.addIceCandidate(new RTCIceCandidate(d.candidate)).catch(() => {});
+            }
+          }
+        });
+      }
+
+      for (const pid of peerIds) {
+        if (voiceRoomPeers[pid] || state.me.id > pid) continue;
+        const peerConn = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
+        voiceRoomPeers[pid] = peerConn;
+        if (voiceRoomStream) voiceRoomStream.getTracks().forEach(t => peerConn.addTrack(t, voiceRoomStream));
+        peerConn.ontrack = (ev) => attachRemoteVoiceAudio(pid, ev.streams[0]);
+        peerConn.onicecandidate = (ev) => {
+          if (ev.candidate) addDoc(sigCol, { from: state.me.id, to: pid, type: 'ice', candidate: ev.candidate.toJSON() });
+        };
+        const off = await peerConn.createOffer();
+        await peerConn.setLocalDescription(off);
+        await addDoc(sigCol, { from: state.me.id, to: pid, type: 'offer', sdp: { type: off.type, sdp: off.sdp } });
+      }
+    }
+
+    document.getElementById('voiceRoomBtn').addEventListener('click', () => {
+      document.getElementById('voiceRoomBar').classList.toggle('hidden');
+    });
+
+    document.getElementById('voiceRoomMuteBtn').addEventListener('click', (e) => {
+      voiceRoomMuted = !voiceRoomMuted;
+      if (voiceRoomStream) voiceRoomStream.getAudioTracks().forEach(t => { t.enabled = !voiceRoomMuted; });
+      e.currentTarget.textContent = voiceRoomMuted ? '🔇' : '🎙️';
+      showToast(voiceRoomMuted ? 'Микрофон выключен' : 'Микрофон включён');
+    });
+
+    document.getElementById('voiceRoomScreenBtn').addEventListener('click', async () => {
+      const st = await startScreenShareWithQuality(1080);
+      if (!st) return;
+      const track = st.getVideoTracks()[0];
+      Object.values(voiceRoomPeers).forEach(p => { if (track) p.addTrack(track, st); });
+      document.getElementById('callPeerName').textContent = 'Трансляция экрана в группе';
+      document.getElementById('callStatusText').textContent = 'В эфире';
+      localVideoEl.srcObject = st;
+      localVideoEl.classList.remove('hidden');
+      callOverlay.style.height = '48vh';
+      callOverlay.classList.remove('hidden');
+      track.onended = () => {
+        localVideoEl.classList.add('hidden');
+        callOverlay.classList.add('hidden');
+      };
+    });
+
+    document.getElementById('voiceRoomJoinBtn').addEventListener('click', async () => {
+      const chat = getCurrentChats().find(c => c.id === activeChatId);
+      if (!chat || chat.type !== 'group') return;
+      const vrMap = { ...(chat.voiceRoom || {}) };
+      const inRoom = !!vrMap[state.me.id];
+
+      if (inRoom) {
+        delete vrMap[state.me.id];
+        cleanupVoiceRoomMesh();
+        if (voiceRoomStream) { voiceRoomStream.getTracks().forEach(t => t.stop()); voiceRoomStream = null; }
+        document.getElementById('voiceRoomScreenBtn').classList.add('hidden');
+        showToast('Вы вышли из аудио-комнаты');
+      } else {
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+          try {
+            voiceRoomStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          } catch (e) {
+            showToast('Нет доступа к микрофону (нужен https)');
+          }
+        }
+        vrMap[state.me.id] = { name: state.me.name, joinedAt: Date.now() };
+        document.getElementById('voiceRoomScreenBtn').classList.remove('hidden');
+        playPopSound();
+        showToast('Вы вошли в аудио-комнату');
+      }
+
+      if (state.mode === 'firebase' && fbDb) {
+        await updateDoc(doc(fbDb, 'chats', chat.id), { voiceRoom: vrMap }).catch(() => {});
+        if (!inRoom) await connectVoiceRoomMesh(chat.id, vrMap);
+      } else {
+        chat.voiceRoom = vrMap;
+        saveState();
+        renderActiveChat();
+      }
+    });
+
+    // Periodic lastSeen heartbeat every 30s
+    setInterval(() => {
+      if (state.mode === 'firebase' && fbDb && !isGuestProfile(state.me)) {
+        syncMyProfileToFirebase().catch(() => {});
+      }
+    }, 30000);
+
+    messagesContainer.addEventListener('click', (e) => {
+      const speedBtn = e.target.closest('.audio-speed-btn');
+      if (speedBtn) {
+        const audio = speedBtn.parentElement.querySelector('audio');
+        if (!audio) return;
+        const next = audio.playbackRate === 1 ? 1.5 : (audio.playbackRate === 1.5 ? 2 : 1);
+        audio.playbackRate = next;
+        speedBtn.textContent = next + 'x';
+        return;
+      }
+      const revBtn = e.target.closest('.reveal-lowdata-btn');
+      if (revBtn && activeChatId) {
+        const msg = getChatMessages(activeChatId).find(m => m.id === revBtn.dataset.revealImgs);
+        if (!msg) return;
+        const arr = (msg.images && msg.images.length > 0) ? msg.images : (msg.image ? [msg.image] : []);
+        if (arr.length > 0) {
+          lightboxImg.src = arr[0];
+          lightbox.classList.remove('hidden');
+        }
+      }
+    });
+
+    // Compact "✦ Fix Text" button in composer
+    const fixTextBtn = document.getElementById('fixTextGeminiBtn');
+    messageInput.addEventListener('input', () => {
+      fixTextBtn.classList.toggle('hidden', messageInput.value.trim().length < 4);
+    });
+    fixTextBtn.addEventListener('click', async () => {
+      const txt = messageInput.value.trim();
+      if (!txt) return;
+      if (!state.geminiApiKey) { showToast('Укажите бесплатный ключ в ✦ Gemini'); return; }
+      fixTextBtn.classList.add('animate-spin');
+      try {
+        const mName = state.lastGeminiModel || lastWorkingGeminiModel || 'gemini-3.8-flash';
+        const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${mName}:generateContent?key=${encodeURIComponent(state.geminiApiKey)}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: 'Исправь орфографию и пунктуацию, сделай текст чуть аккуратнее, сохранив смысл. Верни только готовый текст:\n\n' + txt }] }] })
+        });
+        const j = await r.json();
+        const fixed = j?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+        if (fixed) {
+          messageInput.value = fixed;
+          messageInput.style.height = 'auto';
+          messageInput.style.height = Math.min(messageInput.scrollHeight, 112) + 'px';
+          showToast('Текст улучшен ✦');
+        }
+      } catch (e) { showToast('Не удалось исправить текст'); }
+      fixTextBtn.classList.remove('animate-spin');
+    });
+
+    // Watch Together (YouTube, TikTok, Vimeo, Rutube, Twitch, MP4)
+    function toVideoEmbedHtml(url) {
+      const yt = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+      if (yt) return `<iframe src="https://www.youtube.com/embed/${yt[1]}?autoplay=1" class="w-full h-full border-0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
+      const tt = url.match(/tiktok\.com\/@[^/]+\/video\/(\d+)/);
+      if (tt) return `<iframe src="https://www.tiktok.com/embed/v2/${tt[1]}" class="w-full h-full border-0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+      const vm = url.match(/vimeo\.com\/(\d+)/);
+      if (vm) return `<iframe src="https://player.vimeo.com/video/${vm[1]}?autoplay=1" class="w-full h-full border-0" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
+      const rt = url.match(/rutube\.ru\/video\/([a-zA-Z0-9]+)/);
+      if (rt) return `<iframe src="https://rutube.ru/play/embed/${rt[1]}" class="w-full h-full border-0" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
+      if (/\.(mp4|webm)(\?|$)/i.test(url)) return `<video src="${escapeHtml(url)}" controls autoplay class="w-full h-full"></video>`;
+      return `<div class="p-4 text-center text-xs text-slate-300 space-y-2"><p>Платформа не даёт встроить плеер напрямую.</p><a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" class="inline-block px-3 py-1.5 rounded-xl bg-indigo-600 text-white font-semibold">Открыть видео ↗</a></div>`;
+    }
+
+    function openWatchTogetherBar(url) {
+      const bar = document.getElementById('watchTogetherBar');
+      const wrap = document.getElementById('watchTogetherFrameWrap');
+      wrap.innerHTML = toVideoEmbedHtml(url);
+      bar.classList.remove('hidden');
+    }
+
+    messagesContainer.addEventListener('click', async (e) => {
+      const wBtn = e.target.closest('.watch-together-btn');
+      if (!wBtn) return;
+      const url = wBtn.dataset.watchUrl;
+      openWatchTogetherBar(url);
+      if (state.mode === 'firebase' && fbDb && activeChatId) {
+        await updateDoc(doc(fbDb, 'chats', activeChatId), { watchVideo: url }).catch(() => {});
+      }
+    });
+
+    document.getElementById('closeWatchTogetherBtn').addEventListener('click', async () => {
+      document.getElementById('watchTogetherBar').classList.add('hidden');
+      document.getElementById('watchTogetherFrameWrap').innerHTML = '';
+      if (state.mode === 'firebase' && fbDb && activeChatId) {
+        await updateDoc(doc(fbDb, 'chats', activeChatId), { watchVideo: '' }).catch(() => {});
+      }
+    });
+
     // INIT
     setTimeout(() => {
       const sp = document.getElementById('splashScreen');
@@ -4039,7 +4775,7 @@
         setTimeout(() => sp.remove(), 350);
       }
     }, 850);
-    try { applyTheme(); } catch (e) {}
+    try { applyTheme(); applyAccentTheme(); } catch (e) {}
     try { checkAuthGate(); } catch (e) {}
     renderHeader();
     renderChatList();
