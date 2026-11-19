@@ -575,7 +575,7 @@
 
   <!-- ACTIVE CALL OVERLAY (Smoothly Resizable / Draggable so you can chat below!) -->
   <div id="callOverlay" style="height: 100vh;" class="hidden call-anim fixed top-0 left-0 right-0 z-50 bg-slate-950/95 backdrop-blur-md text-white flex flex-col items-center justify-between p-4 sm:p-5 shadow-2xl border-b border-slate-800 transition-[height] duration-150">
-    <div class="w-full max-w-2xl flex items-center justify-between gap-2">
+    <div class="w-full max-w-6xl flex items-center justify-between gap-2">
       <div class="flex items-center gap-2 min-w-0">
         <p id="callPeerName" class="text-sm sm:text-base font-bold truncate">Звонок</p>
         <span id="callStatusText" class="text-xs text-indigo-300 font-mono shrink-0">Соединение...</span>
@@ -591,9 +591,10 @@
       </div>
     </div>
 
-    <div class="relative w-full max-w-2xl flex-1 my-2.5 flex items-center justify-center rounded-2xl overflow-hidden bg-slate-900 border border-slate-800 min-h-[90px]">
+    <div id="callVideoBox" class="relative w-full max-w-6xl flex-1 my-2.5 flex items-center justify-center rounded-2xl overflow-hidden bg-slate-900 border border-slate-800 min-h-[120px]">
       <video id="remoteVideo" autoplay playsinline class="hidden w-full h-full object-contain transition-transform duration-200 origin-center"></video>
       <button id="callZoomBtn" type="button" class="hidden absolute top-2 left-2 z-10 px-2 py-1 rounded-lg bg-black/50 backdrop-blur text-[10px] font-bold text-white hover:bg-black/70 transition">🔍 1x</button>
+      <button id="callFsBtn" type="button" class="absolute top-2 right-2 z-10 px-2 py-1 rounded-lg bg-black/50 backdrop-blur text-[11px] font-bold text-white hover:bg-black/70 transition" title="На весь экран">⛶</button>
       <div id="callAvatarFallback" class="flex flex-col items-center gap-2">
         <div id="callAvatarCircle" class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-indigo-600 flex items-center justify-center text-2xl font-bold shadow-lg animate-pulse"></div>
         <span class="text-[11px] text-slate-400">Защищено WebRTC · Тяните ползунок снизу, чтобы писать в чат</span>
@@ -1288,6 +1289,9 @@
             ? `<div class="flex justify-center my-2"><span class="px-3 py-0.5 rounded-full text-[11px] font-medium bg-slate-200/80 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 backdrop-blur-sm">${escapeHtml(dayLabel)}</span></div>`
             : '';
           lastDay = dayLabel;
+          if (m.callLog) {
+            return dayDivider + `<div class="msg-enter-in flex justify-center my-1.5"><span class="px-3.5 py-1 rounded-full text-xs font-medium bg-slate-200/85 dark:bg-slate-800/85 text-slate-700 dark:text-slate-200 shadow-sm">${escapeHtml(m.callLog)} · ${escapeHtml(formatTime(m.createdAt))}</span></div>`;
+          }
           return dayDivider + `
             <div class="${isMe ? 'msg-enter-out' : 'msg-enter-in'} flex ${isMe ? 'justify-end' : 'justify-start'}">
               ${(() => {
@@ -3178,6 +3182,7 @@
           document.getElementById('acceptCallBtn').onclick = () => answerIncomingCall(chatId, data);
           document.getElementById('declineCallBtn').onclick = () => {
             incomingCallBanner.classList.add('hidden');
+            logCallEvent(chatId, '📵 Пропущенный звонок');
             deleteDoc(doc(fbDb, 'chats', chatId, 'calls', 'active')).catch(() => {});
           };
         }
@@ -3560,6 +3565,10 @@
 
     function playRingbackBeep() {
       if (state.settings?.sounds === false) return;
+      if (callOverlay.classList.contains('hidden') && document.getElementById('minimizedCallBar').classList.contains('hidden')) {
+        clearInterval(ringbackInt); ringbackInt = null;
+        return;
+      }
       try {
         const ctx = new (window.AudioContext || window.webkitAudioContext)();
         const osc = ctx.createOscillator();
@@ -3691,6 +3700,7 @@
       }
 
       if (localStream) startSpeakingMonitor(localStream);
+      clearInterval(ringbackInt);
       playRingbackBeep();
       ringbackInt = setInterval(playRingbackBeep, 2600);
       if (state.mode !== 'firebase' || !fbDb) {
@@ -3798,6 +3808,30 @@
       });
     }
 
+    async function logCallEvent(chatId, label) {
+      if (!chatId) return;
+      const payload = {
+        senderId: state.me.id,
+        senderName: state.me.name,
+        text: '',
+        callLog: label,
+        image: '',
+        createdAt: Date.now()
+      };
+      if (state.mode === 'firebase' && fbDb) {
+        await addDoc(collection(fbDb, 'chats', chatId, 'messages'), { ...payload, createdAt: serverTimestamp() }).catch(() => {});
+        await updateDoc(doc(fbDb, 'chats', chatId), { lastText: label, updatedAt: Date.now() }).catch(() => {});
+      } else {
+        if (!state.messages[chatId]) state.messages[chatId] = [];
+        state.messages[chatId].push({ id: 'm_call_' + Date.now(), ...payload });
+        const ch = state.chats.find(c => c.id === chatId);
+        if (ch) { ch.updatedAt = Date.now(); ch.lastText = label; }
+        saveState();
+        renderChatList();
+        if (activeChatId === chatId) renderActiveChat();
+      }
+    }
+
     async function endCall(notifyRemote = true) {
       clearInterval(callTimerInt);
       if (unsubCallDoc) { unsubCallDoc(); unsubCallDoc = null; }
@@ -3805,11 +3839,21 @@
       if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
       localVideoEl.srcObject = null;
       remoteVideoEl.srcObject = null;
-      localVideoEl.classList.add('hidden');
+      localVideoEl.className = 'hidden absolute bottom-2 right-2 w-20 h-28 sm:w-24 sm:h-32 object-cover rounded-xl border-2 border-white/40 shadow-lg cursor-grab active:cursor-grabbing touch-none z-20';
+      localVideoEl.style.left = ''; localVideoEl.style.top = ''; localVideoEl.style.right = ''; localVideoEl.style.bottom = '';
       remoteVideoEl.classList.add('hidden');
       callAvatarFallback.classList.remove('hidden');
       callOverlay.classList.add('hidden');
       document.getElementById('minimizedCallBar').classList.add('hidden');
+      const logTargetChat = currentCallDocId || activeChatId;
+      const hadDuration = callSeconds > 0;
+      const mm = String(Math.floor(callSeconds / 60)).padStart(2, '0');
+      const ss = String(callSeconds % 60).padStart(2, '0');
+      callSeconds = 0;
+      if (notifyRemote && logTargetChat) {
+        const label = hadDuration ? `📞 Звонок завершён · ${mm}:${ss}` : '📵 Пропущенный / отменённый звонок';
+        await logCallEvent(logTargetChat, label);
+      }
       if (notifyRemote && currentCallDocId && state.mode === 'firebase' && fbDb) {
         await deleteDoc(doc(fbDb, 'chats', currentCallDocId, 'calls', 'active')).catch(() => {});
       }
@@ -3818,6 +3862,16 @@
 
     document.getElementById('audioCallBtn').addEventListener('click', () => startCall(false));
     document.getElementById('videoCallBtn').addEventListener('click', () => startCall(true));
+    document.getElementById('callFsBtn').addEventListener('click', async () => {
+      const box = document.getElementById('callVideoBox');
+      try {
+        if (!document.fullscreenElement) await box.requestFullscreen();
+        else await document.exitFullscreen();
+      } catch (e) {
+        callOverlay.style.height = callOverlay.style.height === '100vh' ? '60vh' : '100vh';
+      }
+    });
+
     document.getElementById('callZoomBtn').addEventListener('click', (e) => {
       callZoomLevel = callZoomLevel === 1 ? 1.5 : (callZoomLevel === 1.5 ? 2 : 1);
       remoteVideoEl.style.transform = `scale(${callZoomLevel})`;
@@ -4818,8 +4872,11 @@
         screenStream.getTracks().forEach(t => t.stop());
         screenStream = null;
         try { window.PulseNativeScreen?.stopScreenShare?.(); } catch (e) {}
+        localVideoEl.className = 'hidden absolute bottom-2 right-2 w-20 h-28 sm:w-24 sm:h-32 object-cover rounded-xl border-2 border-white/40 shadow-lg cursor-grab active:cursor-grabbing touch-none z-20';
+        if (remoteVideoEl.classList.contains('hidden')) callAvatarFallback.classList.remove('hidden');
         if (localStream && localStream.getVideoTracks().length > 0) {
           localVideoEl.srcObject = localStream;
+          localVideoEl.classList.remove('hidden');
           const sender = pc?.getSenders().find(s => s.track && s.track.kind === 'video');
           if (sender) sender.replaceTrack(localStream.getVideoTracks()[0]).catch(() => {});
         } else {
@@ -4833,7 +4890,10 @@
       if (!screenStream) return;
       const sTrack = screenStream.getVideoTracks()[0];
       localVideoEl.srcObject = screenStream;
-      localVideoEl.classList.remove('hidden');
+      localVideoEl.className = 'w-full h-full object-contain rounded-xl';
+      localVideoEl.style.left = ''; localVideoEl.style.top = ''; localVideoEl.style.right = ''; localVideoEl.style.bottom = '';
+      callAvatarFallback.classList.add('hidden');
+      callOverlay.style.height = '82vh';
       if (pc && sTrack) {
         let sender = pc.getSenders().find(s => s.track && s.track.kind === 'video');
         if (sender) await sender.replaceTrack(sTrack).catch(() => {});
@@ -4947,8 +5007,10 @@
       document.getElementById('callPeerName').textContent = 'Трансляция экрана в группе';
       document.getElementById('callStatusText').textContent = 'В эфире';
       localVideoEl.srcObject = st;
-      localVideoEl.classList.remove('hidden');
-      callOverlay.style.height = '48vh';
+      localVideoEl.className = 'w-full h-full object-contain rounded-xl';
+      localVideoEl.style.left = ''; localVideoEl.style.top = ''; localVideoEl.style.right = ''; localVideoEl.style.bottom = '';
+      callAvatarFallback.classList.add('hidden');
+      callOverlay.style.height = '82vh';
       callOverlay.classList.remove('hidden');
       track.onended = () => {
         localVideoEl.classList.add('hidden');
