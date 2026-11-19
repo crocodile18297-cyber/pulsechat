@@ -44,6 +44,48 @@ jobs:
           npx cap add android
           npx cap sync android
 
+      - name: Generate Custom PulseChat App Icon
+        run: |
+          python3 -m pip install --quiet pillow
+          python3 - << 'PY'
+          import os, glob
+          from PIL import Image, ImageDraw
+
+          S = 512
+          img = Image.new("RGBA", (S, S), (0, 0, 0, 0))
+          px = img.load()
+          for y in range(S):
+              for x in range(S):
+                  t = (x + y) / (2 * S)
+                  r = int(79 + (6 - 79) * t)
+                  g = int(70 + (182 - 70) * t)
+                  b = int(229 + (212 - 229) * t)
+                  px[x, y] = (r, g, b, 255)
+
+          mask = Image.new("L", (S, S), 0)
+          ImageDraw.Draw(mask).rounded_rectangle([0, 0, S-1, S-1], radius=128, fill=255)
+          img.putalpha(mask)
+
+          d = ImageDraw.Draw(img)
+          # Speech bubble
+          d.rounded_rectangle([120, 145, 392, 345], radius=52, fill=(255, 255, 255, 245))
+          d.polygon([(155, 330), (130, 395), (215, 345)], fill=(255, 255, 255, 245))
+          # Pulse wave inside bubble
+          pts = [(155, 248), (195, 248), (220, 195), (255, 295), (288, 225), (315, 248), (355, 248)]
+          d.line(pts, fill=(99, 102, 241, 255), width=22, joint="curve")
+          # Gold sparkle dot
+          d.ellipse([365, 95, 420, 150], fill=(251, 191, 36, 255))
+
+          for folder in glob.glob("android/app/src/main/res/mipmap-*"):
+              for fname in ["ic_launcher.png", "ic_launcher_round.png", "ic_launcher_foreground.png"]:
+                  fpath = os.path.join(folder, fname)
+                  if os.path.exists(fpath):
+                      cur = Image.open(fpath)
+                      resized = img.resize(cur.size, Image.Resampling.LANCZOS)
+                      resized.save(fpath, "PNG")
+          print("Custom PulseChat launcher icons generated!")
+          PY
+
       - name: Add Permissions & MediaProjection Service to Manifest
         run: |
           MANIFEST="android/app/src/main/AndroidManifest.xml"
