@@ -510,7 +510,7 @@
       <form id="authRegisterForm" class="space-y-3">
         <input id="authRegName" type="text" required placeholder="Ваше имя (например: Алина)" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
         <input id="authRegHandle" type="text" required placeholder="Никнейм (например: @alina)" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-        <input id="authRegPin" type="password" inputmode="numeric" maxlength="12" placeholder="PIN-код для входа (необязательно)" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+        <input id="authRegPin" type="password" inputmode="numeric" minlength="4" maxlength="12" required placeholder="Придумайте PIN-код (мин. 4 цифры)" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
         <button type="submit" class="w-full py-2.5 rounded-xl bg-indigo-600 text-white font-semibold text-sm hover:bg-indigo-700 transition shadow">Начать общение</button>
       </form>
 
@@ -579,6 +579,7 @@
       <div class="flex items-center gap-2 min-w-0">
         <p id="callPeerName" class="text-sm sm:text-base font-bold truncate">Звонок</p>
         <span id="callStatusText" class="text-xs text-indigo-300 font-mono shrink-0">Соединение...</span>
+        <span id="callPingBadge" class="hidden text-[10px] font-mono px-1.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 shrink-0">-- мс</span>
       </div>
       <div class="flex items-center gap-1.5 shrink-0">
         <select id="screenQualitySelect" class="px-2 py-1 rounded-lg bg-slate-800 text-[11px] font-semibold border border-slate-700 focus:outline-none" title="Качество трансляции экрана">
@@ -591,12 +592,13 @@
     </div>
 
     <div class="relative w-full max-w-2xl flex-1 my-2.5 flex items-center justify-center rounded-2xl overflow-hidden bg-slate-900 border border-slate-800 min-h-[90px]">
-      <video id="remoteVideo" autoplay playsinline class="hidden w-full h-full object-contain"></video>
+      <video id="remoteVideo" autoplay playsinline class="hidden w-full h-full object-contain transition-transform duration-200 origin-center"></video>
+      <button id="callZoomBtn" type="button" class="hidden absolute top-2 left-2 z-10 px-2 py-1 rounded-lg bg-black/50 backdrop-blur text-[10px] font-bold text-white hover:bg-black/70 transition">🔍 1x</button>
       <div id="callAvatarFallback" class="flex flex-col items-center gap-2">
         <div id="callAvatarCircle" class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-indigo-600 flex items-center justify-center text-2xl font-bold shadow-lg animate-pulse"></div>
         <span class="text-[11px] text-slate-400">Защищено WebRTC · Тяните ползунок снизу, чтобы писать в чат</span>
       </div>
-      <video id="localVideo" autoplay muted playsinline class="hidden absolute bottom-2 right-2 w-24 h-32 object-cover rounded-xl border-2 border-white/30 shadow-lg"></video>
+      <video id="localVideo" autoplay muted playsinline class="hidden absolute bottom-2 right-2 w-20 h-28 sm:w-24 sm:h-32 object-cover rounded-xl border-2 border-white/40 shadow-lg cursor-grab active:cursor-grabbing touch-none z-20"></video>
     </div>
 
     <div class="flex items-center gap-3 mb-1">
@@ -610,14 +612,23 @@
       <button id="shareScreenCallBtn" type="button" class="p-3 rounded-full bg-slate-800 hover:bg-indigo-600 transition" title="Трансляция экрана">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
       </button>
+      <div class="relative">
+        <div id="callVolPopover" class="hidden absolute bottom-14 left-1/2 -translate-x-1/2 bg-slate-900/95 border border-slate-700 rounded-xl px-3 py-2 shadow-xl flex items-center gap-2 z-30">
+          <input id="callVolRange" type="range" min="0" max="1" step="0.05" value="1" class="w-24 accent-indigo-500" />
+        </div>
+        <button id="callVolBtn" type="button" class="p-3 rounded-full bg-slate-800 hover:bg-slate-700 transition" title="Громкость собеседника">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+        </button>
+      </div>
       <button id="endCallBtn" type="button" class="p-3 rounded-full bg-rose-600 hover:bg-rose-700 transition shadow-lg" title="Завершить звонок">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M10.68 13.31a16 16 0 0 0 3.41 2.6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91"/><line x1="23" y1="1" x2="1" y2="23"/></svg>
       </button>
     </div>
 
-    <!-- Drag Handle to freely resize call window height -->
-    <div id="callResizeHandle" class="w-full py-1.5 flex items-center justify-center cursor-ns-resize touch-none select-none" title="Потяните вверх или вниз">
-      <div class="w-12 h-1.5 rounded-full bg-white/35 hover:bg-white/60 transition"></div>
+    <!-- Drag Handle to gradually resize call window height -->
+    <div id="callResizeHandle" class="w-full py-3 flex flex-col items-center justify-center gap-1 cursor-ns-resize touch-none select-none" title="Потяните вверх или вниз">
+      <div class="w-16 h-1.5 rounded-full bg-white/50 hover:bg-white/80 transition"></div>
+      <span class="text-[9px] text-white/45 tracking-wide">Потяните, чтобы изменить размер</span>
     </div>
   </div>
 
@@ -678,7 +689,8 @@
         bubbleStyle: 'classic',
         browserNotifications: false,
         lowDataMode: false,
-        accentTheme: 'accent-indigo'
+        accentTheme: 'accent-indigo',
+        showCallPing: true
       },
       mode: 'firebase', // 'demo' | 'firebase'
       firebaseConfig: {
@@ -863,6 +875,62 @@
 
     function isCreator(handle = state.me.handle) {
       return String(handle || '').toLowerCase().replace(/^@+/, '').trim() === 'kotello';
+    }
+
+    async function hashPin(pin) {
+      const raw = String(pin || '').trim();
+      if (!raw) return '';
+      if (window.crypto && crypto.subtle) {
+        const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('pulse_salt_' + raw));
+        return 'sha256:' + Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+      }
+      return raw;
+    }
+
+    async function verifyPin(storedPin, enteredPin) {
+      if (!storedPin) return true;
+      const cleanEntered = String(enteredPin || '').trim();
+      if (String(storedPin).startsWith('sha256:')) {
+        return (await hashPin(cleanEntered)) === storedPin;
+      }
+      return storedPin === cleanEntered;
+    }
+
+    let pinFailCount = 0;
+    let pinLockUntil = 0;
+    function checkPinRateLimit() {
+      if (Date.now() < pinLockUntil) {
+        const sec = Math.ceil((pinLockUntil - Date.now()) / 1000);
+        showToast('Слишком много попыток. Подождите ' + sec + ' сек.');
+        return false;
+      }
+      return true;
+    }
+    function recordPinFail() {
+      pinFailCount++;
+      if (pinFailCount >= 5) {
+        pinLockUntil = Date.now() + 30000;
+        pinFailCount = 0;
+        showToast('Вход заблокирован на 30 сек. из-за неверных попыток');
+      } else {
+        showToast('Неверный PIN-код');
+      }
+    }
+
+    let recentMsgTimes = [];
+    function allowSendRate() {
+      const now = Date.now();
+      recentMsgTimes = recentMsgTimes.filter(t => now - t < 3000);
+      if (recentMsgTimes.length >= 5) {
+        showToast('Слишком быстро — подождите секунду');
+        return false;
+      }
+      recentMsgTimes.push(now);
+      return true;
+    }
+
+    function isSafeHttpUrl(url) {
+      return /^https?:\/\//i.test(String(url || '').trim());
     }
 
     function normalizeHandleId(handle) {
@@ -1346,7 +1414,7 @@
       e.preventDefault();
       const text = messageInput.value.trim();
       if (!text && !pendingImageDataUrl && pendingImages.length === 0) return;
-      if (!activeChatId) return;
+      if (!activeChatId || !allowSendRate()) return;
 
       if (editingMsgId) {
         if (!text) return;
@@ -1947,6 +2015,10 @@
               <input id="setEnterSend" type="checkbox" ${cfg.enterToSend !== false ? 'checked' : ''} class="w-4 h-4 accent-indigo-600 rounded" />
             </label>
             <label class="px-3.5 py-3 flex items-center justify-between gap-3 cursor-pointer">
+              <span class="text-sm font-medium">Показывать пинг в звонке</span>
+              <input id="setShowCallPing" type="checkbox" ${cfg.showCallPing !== false ? 'checked' : ''} class="w-4 h-4 accent-indigo-600 rounded" />
+            </label>
+            <label class="px-3.5 py-3 flex items-center justify-between gap-3 cursor-pointer">
               <span class="text-sm font-medium">Экономия трафика (слабый интернет)</span>
               <input id="setLowDataMode" type="checkbox" ${cfg.lowDataMode ? 'checked' : ''} class="w-4 h-4 accent-indigo-600 rounded" />
             </label>
@@ -2071,6 +2143,11 @@
         saveState();
       });
 
+      document.getElementById('setShowCallPing').addEventListener('change', (e) => {
+        if (!state.settings) state.settings = {};
+        state.settings.showCallPing = e.target.checked;
+        saveState();
+      });
       document.getElementById('setLowDataMode').addEventListener('change', (e) => {
         if (!state.settings) state.settings = {};
         state.settings.lowDataMode = e.target.checked;
@@ -2220,7 +2297,7 @@
           </div>
           <div>
             <label class="block text-xs font-medium text-slate-500 mb-1">PIN-код (для входа с любого браузера)</label>
-            <input id="profPinInput" type="password" inputmode="numeric" maxlength="12" placeholder="Например: 1234" value="${escapeHtml(state.me.pin || '')}" class="w-full px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-transparent focus:border-indigo-500 focus:outline-none" />
+            <input id="profPinInput" type="password" inputmode="numeric" maxlength="12" placeholder="Например: 1234" value="" placeholder="${state.me.pin ? 'PIN задан (введите новый для смены)' : 'Например: 1234'}" class="w-full px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-transparent focus:border-indigo-500 focus:outline-none" />
           </div>
           <button type="submit" class="w-full py-2.5 rounded-xl bg-indigo-600 text-white font-semibold hover:bg-indigo-700 transition">Сохранить профиль</button>
         </form>
@@ -2305,7 +2382,8 @@
         if (!h.startsWith('@')) h = '@' + h;
         state.me.handle = h;
         state.me.bio = document.getElementById('profBioInput').value.trim();
-        state.me.pin = document.getElementById('profPinInput').value.trim();
+        const rawPin = document.getElementById('profPinInput').value.trim();
+        state.me.pin = rawPin.startsWith('sha256:') ? rawPin : (rawPin ? await hashPin(rawPin) : state.me.pin);
         if (h !== '@you') {
           state.me.id = normalizeHandleId(h);
         }
@@ -2349,10 +2427,12 @@
             showToast('Пользователь ' + h + ' не найден в базе');
             return;
           }
-          if (userData.pin && userData.pin !== enteredPin) {
-            showToast('Неверный PIN-код');
+          if (!checkPinRateLimit()) return;
+          if (userData.pin && !(await verifyPin(userData.pin, enteredPin))) {
+            recordPinFail();
             return;
           }
+          pinFailCount = 0;
           state.me = {
             id: resolvedId,
             name: userData.name || 'Пользователь',
@@ -3473,9 +3553,108 @@
     const remoteVideoEl = document.getElementById('remoteVideo');
     const callAvatarFallback = document.getElementById('callAvatarFallback');
 
+    let ringbackInt = null;
+    let pingStatsInt = null;
+    let speakingRaf = null;
+    let callZoomLevel = 1;
+
+    function playRingbackBeep() {
+      if (state.settings?.sounds === false) return;
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(425, ctx.currentTime);
+        gain.gain.setValueAtTime(0.04, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.45);
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.start(); osc.stop(ctx.currentTime + 0.46);
+      } catch (e) {}
+    }
+
+    function playHangupBeep() {
+      if (state.settings?.sounds === false) return;
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(340, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(220, ctx.currentTime + 0.18);
+        gain.gain.setValueAtTime(0.05, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.start(); osc.stop(ctx.currentTime + 0.21);
+      } catch (e) {}
+    }
+
+    function startSpeakingMonitor(stream) {
+      cancelAnimationFrame(speakingRaf);
+      const circle = document.getElementById('callAvatarCircle');
+      if (!stream || !circle) return;
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const src = ctx.createMediaStreamSource(stream);
+        const an = ctx.createAnalyser();
+        an.fftSize = 32;
+        src.connect(an);
+        const data = new Uint8Array(an.frequencyBinCount);
+        const tick = () => {
+          if (callOverlay.classList.contains('hidden')) { ctx.close().catch(()=>{}); return; }
+          an.getByteFrequencyData(data);
+          const avg = data.reduce((a, b) => a + b, 0) / data.length;
+          circle.classList.toggle('ring-4', avg > 18);
+          circle.classList.toggle('ring-emerald-400', avg > 18);
+          speakingRaf = requestAnimationFrame(tick);
+        };
+        tick();
+      } catch (e) {}
+    }
+
+    function startPingMonitor() {
+      clearInterval(pingStatsInt);
+      const badge = document.getElementById('callPingBadge');
+      if (state.settings?.showCallPing === false) { badge.classList.add('hidden'); return; }
+      badge.classList.remove('hidden');
+      pingStatsInt = setInterval(async () => {
+        if (!pc || state.settings?.showCallPing === false) return;
+        try {
+          const stats = await pc.getStats();
+          stats.forEach(r => {
+            if (r.type === 'candidate-pair' && r.state === 'succeeded' && typeof r.currentRoundTripTime === 'number') {
+              const ms = Math.round(r.currentRoundTripTime * 1000);
+              badge.textContent = ms + ' мс';
+              badge.className = 'text-[10px] font-mono px-1.5 py-0.5 rounded-md shrink-0 ' + (ms < 85 ? 'bg-emerald-500/20 text-emerald-300' : (ms < 180 ? 'bg-amber-500/20 text-amber-300' : 'bg-rose-500/20 text-rose-300'));
+            }
+          });
+        } catch (e) {}
+      }, 2500);
+    }
+
+    function attachIceRestart(peerConn) {
+      if (!peerConn) return;
+      peerConn.oniceconnectionstatechange = () => {
+        if (peerConn.iceConnectionState === 'disconnected' || peerConn.iceConnectionState === 'failed') {
+          try { peerConn.restartIce(); showToast('Переподключение связи...'); } catch (e) {}
+        }
+      };
+    }
+
     function startCallTimer() {
+      clearInterval(ringbackInt);
       callSeconds = 0;
       clearInterval(callTimerInt);
+      clearInterval(ringbackInt);
+      clearInterval(pingStatsInt);
+      cancelAnimationFrame(speakingRaf);
+      document.getElementById('callPingBadge').classList.add('hidden');
+      document.getElementById('callZoomBtn').classList.add('hidden');
+      document.getElementById('callVolPopover').classList.add('hidden');
+      callZoomLevel = 1;
+      remoteVideoEl.style.transform = '';
+      playHangupBeep();
+      startPingMonitor();
       callTimerInt = setInterval(() => {
         callSeconds++;
         const mm = String(Math.floor(callSeconds / 60)).padStart(2, '0');
@@ -3491,16 +3670,17 @@
       document.getElementById('callPeerName').textContent = chat.title;
       document.getElementById('callAvatarCircle').textContent = getInitials(chat.title);
       document.getElementById('callStatusText').textContent = 'Подключение...';
+      callOverlay.style.height = '58vh';
       callOverlay.classList.remove('hidden');
 
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         showToast('Камера и микрофон работают только по https-ссылке в браузере');
       } else {
         try {
-          localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: withVideo });
+          localStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }, video: withVideo });
         } catch (err) {
           if (withVideo) {
-            try { localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false }); } catch (e2) {}
+            try { localStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }, video: false }); } catch (e2) {}
           }
           if (!localStream) showToast('Браузер заблокировал микрофон/камеру (нужен https и разрешение)');
         }
@@ -3510,6 +3690,9 @@
         }
       }
 
+      if (localStream) startSpeakingMonitor(localStream);
+      playRingbackBeep();
+      ringbackInt = setInterval(playRingbackBeep, 2600);
       if (state.mode !== 'firebase' || !fbDb) {
         document.getElementById('callStatusText').textContent = 'Гудок (Демо)...';
         setTimeout(() => {
@@ -3520,10 +3703,13 @@
 
       try {
         pc = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
+      attachIceRestart(pc);
+        attachIceRestart(pc);
         if (localStream) localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
         pc.ontrack = (ev) => {
           remoteVideoEl.srcObject = ev.streams[0];
           remoteVideoEl.classList.remove('hidden');
+          document.getElementById('callZoomBtn').classList.remove('hidden');
           callAvatarFallback.classList.add('hidden');
         };
         const callRef = doc(fbDb, 'chats', activeChatId, 'calls', 'active');
@@ -3572,7 +3758,7 @@
       callOverlay.classList.remove('hidden');
 
       try {
-        localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: !!callData.withVideo });
+        localStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }, video: !!callData.withVideo });
         if (callData.withVideo) {
           localVideoEl.srcObject = localStream;
           localVideoEl.classList.remove('hidden');
@@ -3584,6 +3770,7 @@
       pc.ontrack = (ev) => {
         remoteVideoEl.srcObject = ev.streams[0];
         remoteVideoEl.classList.remove('hidden');
+        document.getElementById('callZoomBtn').classList.remove('hidden');
         callAvatarFallback.classList.add('hidden');
       };
 
@@ -3631,6 +3818,50 @@
 
     document.getElementById('audioCallBtn').addEventListener('click', () => startCall(false));
     document.getElementById('videoCallBtn').addEventListener('click', () => startCall(true));
+    document.getElementById('callZoomBtn').addEventListener('click', (e) => {
+      callZoomLevel = callZoomLevel === 1 ? 1.5 : (callZoomLevel === 1.5 ? 2 : 1);
+      remoteVideoEl.style.transform = `scale(${callZoomLevel})`;
+      e.currentTarget.textContent = '🔍 ' + callZoomLevel + 'x';
+    });
+
+    document.getElementById('callVolBtn').addEventListener('click', () => {
+      document.getElementById('callVolPopover').classList.toggle('hidden');
+    });
+    document.getElementById('callVolRange').addEventListener('input', (e) => {
+      const vol = Number(e.target.value);
+      remoteVideoEl.volume = vol;
+      document.querySelectorAll('#voiceRoomAudioContainer audio').forEach(a => { a.volume = vol; });
+    });
+
+    // Draggable localVideo mini-PiP inside video box
+    let dragPip = false, pipStartX = 0, pipStartY = 0, pipOrigLeft = 0, pipOrigTop = 0;
+    const startPipDrag = (cx, cy) => {
+      dragPip = true;
+      const parent = localVideoEl.parentElement.getBoundingClientRect();
+      const rect = localVideoEl.getBoundingClientRect();
+      pipOrigLeft = rect.left - parent.left;
+      pipOrigTop = rect.top - parent.top;
+      pipStartX = cx; pipStartY = cy;
+      localVideoEl.style.right = 'auto';
+      localVideoEl.style.bottom = 'auto';
+      localVideoEl.style.left = pipOrigLeft + 'px';
+      localVideoEl.style.top = pipOrigTop + 'px';
+    };
+    const movePipDrag = (cx, cy) => {
+      if (!dragPip) return;
+      const parent = localVideoEl.parentElement.getBoundingClientRect();
+      const nx = Math.max(4, Math.min(parent.width - localVideoEl.offsetWidth - 4, pipOrigLeft + (cx - pipStartX)));
+      const ny = Math.max(4, Math.min(parent.height - localVideoEl.offsetHeight - 4, pipOrigTop + (cy - pipStartY)));
+      localVideoEl.style.left = nx + 'px';
+      localVideoEl.style.top = ny + 'px';
+    };
+    localVideoEl.addEventListener('pointerdown', (e) => startPipDrag(e.clientX, e.clientY));
+    window.addEventListener('pointermove', (e) => movePipDrag(e.clientX, e.clientY));
+    window.addEventListener('pointerup', () => { dragPip = false; });
+    localVideoEl.addEventListener('touchstart', (e) => { if (e.touches[0]) startPipDrag(e.touches[0].clientX, e.touches[0].clientY); }, { passive: true });
+    window.addEventListener('touchmove', (e) => { if (dragPip && e.touches[0]) movePipDrag(e.touches[0].clientX, e.touches[0].clientY); }, { passive: true });
+    window.addEventListener('touchend', () => { dragPip = false; });
+
     document.getElementById('endCallBtn').addEventListener('click', () => endCall(true));
     document.getElementById('minEndCallBtn').addEventListener('click', () => endCall(true));
     document.getElementById('minimizeCallBtn').addEventListener('click', () => {
@@ -3942,11 +4173,12 @@
         } catch (e) {}
       }
 
+      const hashedPin = await hashPin(pin);
       state.me = {
         id: newId,
         name,
         handle: h,
-        pin,
+        pin: hashedPin,
         bio: 'На связи в PulseChat',
         avatarColor: AVATAR_COLORS[Math.floor(Math.random() * AVATAR_COLORS.length)],
         avatarImage: ''
@@ -3989,10 +4221,12 @@
           showToast('Аккаунт ' + h + ' не найден');
           return;
         }
-        if (best.pin && best.pin !== enteredPin) {
-          showToast('Неверный PIN-код');
+        if (!checkPinRateLimit()) return;
+        if (best.pin && !(await verifyPin(best.pin, enteredPin))) {
+          recordPinFail();
           return;
         }
+        pinFailCount = 0;
         state.me = {
           id: best.id,
           name: best.name || 'Пользователь',
@@ -4448,22 +4682,40 @@
       });
     });
 
-    // Draggable / Resizable Call Overlay Handle (smoothly pull up/down to type in chat!)
+    // Smooth Gradual Drag-Resize for Call Window (Touch + Mouse/Pointer, works for 1-on-1 & Group)
     const callResizeHandle = document.getElementById('callResizeHandle');
     let isDraggingCall = false;
+    function updateCallHeight(clientY) {
+      const minH = 210;
+      const maxH = window.innerHeight;
+      const h = Math.max(minH, Math.min(maxH, clientY + 16));
+      callOverlay.style.height = h + 'px';
+    }
     callResizeHandle.addEventListener('pointerdown', (e) => {
       isDraggingCall = true;
       callOverlay.style.transition = 'none';
-      callResizeHandle.setPointerCapture(e.pointerId);
+      try { callResizeHandle.setPointerCapture(e.pointerId); } catch (err) {}
     });
     window.addEventListener('pointermove', (e) => {
       if (!isDraggingCall) return;
-      const minH = 210;
-      const maxH = window.innerHeight;
-      const h = Math.max(minH, Math.min(maxH, e.clientY + 12));
-      callOverlay.style.height = h + 'px';
+      updateCallHeight(e.clientY);
     });
     window.addEventListener('pointerup', () => {
+      if (!isDraggingCall) return;
+      isDraggingCall = false;
+      callOverlay.style.transition = '';
+    });
+    callResizeHandle.addEventListener('touchstart', (e) => {
+      isDraggingCall = true;
+      callOverlay.style.transition = 'none';
+      e.preventDefault();
+    }, { passive: false });
+    window.addEventListener('touchmove', (e) => {
+      if (!isDraggingCall || !e.touches[0]) return;
+      updateCallHeight(e.touches[0].clientY);
+      e.preventDefault();
+    }, { passive: false });
+    window.addEventListener('touchend', () => {
       if (!isDraggingCall) return;
       isDraggingCall = false;
       callOverlay.style.transition = '';
@@ -4719,7 +4971,7 @@
       } else {
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
           try {
-            voiceRoomStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            voiceRoomStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } });
           } catch (e) {
             showToast('Нет доступа к микрофону (нужен https)');
           }
@@ -4813,6 +5065,7 @@
     }
 
     function openWatchTogetherBar(url) {
+      if (!isSafeHttpUrl(url)) return;
       const bar = document.getElementById('watchTogetherBar');
       const wrap = document.getElementById('watchTogetherFrameWrap');
       wrap.innerHTML = toVideoEmbedHtml(url);
