@@ -606,6 +606,7 @@
       <button id="toggleCamBtn" type="button" class="p-3 rounded-full bg-slate-800 hover:bg-slate-700 transition" title="Камера">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
       </button>
+      <button id="flipCamCallBtn" type="button" class="p-3 rounded-full bg-slate-800 hover:bg-slate-700 transition" title="Переключить камеру (передняя / задняя)">🔄</button>
       <button id="shareScreenCallBtn" type="button" class="p-3 rounded-full bg-slate-800 hover:bg-indigo-600 transition" title="Трансляция экрана">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
       </button>
@@ -3652,6 +3653,29 @@
       if (localStream) localStream.getAudioTracks().forEach(t => { t.enabled = !micMuted; });
       showToast(micMuted ? 'Микрофон выключен' : 'Микрофон включён');
     });
+    let useFrontCam = true;
+    document.getElementById('flipCamCallBtn').addEventListener('click', async () => {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return;
+      useFrontCam = !useFrontCam;
+      try {
+        const newStream = await navigator.mediaDevices.getUserMedia({ audio: false, video: { facingMode: useFrontCam ? 'user' : 'environment' } });
+        const newTrack = newStream.getVideoTracks()[0];
+        if (localStream) {
+          localStream.getVideoTracks().forEach(t => { t.stop(); localStream.removeTrack(t); });
+          localStream.addTrack(newTrack);
+        } else {
+          localStream = newStream;
+        }
+        localVideoEl.srcObject = localStream;
+        localVideoEl.classList.remove('hidden');
+        const sender = pc?.getSenders().find(s => s.track && s.track.kind === 'video');
+        if (sender && newTrack) await sender.replaceTrack(newTrack).catch(() => {});
+        showToast(useFrontCam ? 'Фронтальная камера' : 'Задняя камера');
+      } catch (err) {
+        showToast('Не удалось переключить камеру');
+      }
+    });
+
     document.getElementById('toggleCamBtn').addEventListener('click', () => {
       camOff = !camOff;
       if (localStream) localStream.getVideoTracks().forEach(t => { t.enabled = !camOff; });
@@ -4475,7 +4499,7 @@
 
     async function startScreenShareWithQuality(qualityH) {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
-        showToast('Трансляция экрана поддерживается в браузере на ПК или через https');
+        showToast('Захват экрана недоступен в мобильных браузерах (работает только на ПК)');
         return null;
       }
       const heights = [Number(qualityH) || 1080, 720, 480].filter((v, i, a) => a.indexOf(v) === i && v <= (Number(qualityH) || 1080));
